@@ -609,9 +609,10 @@ function switchWfTab(tab) {
     <h2 data-i18n="dl.title">지금 시작하세요</h2>
     <p data-i18n="dl.sub">완전 무료 · 데이터 외부 전송 없음 · 오프라인 작동</p>
     <div class="dl-btns">
-      <a href="https://github.com/Manmon7/srt-subtitle-generator/releases/latest/download/Windows.zip" class="btn-lp btn-lp-gold"><span data-i18n="dl.win">⬇ Windows 다운로드</span></a>
-      <a href="https://github.com/Manmon7/srt-subtitle-generator/releases/latest/download/Mac_linux.zip" class="btn-lp btn-lp-outline"><span data-i18n="dl.mac">⬇ Mac / Linux</span></a>
-    </div>
+  <!-- 클릭 시 팝업을 먼저 띄우고, href 주소로 파일 다운로드가 진행됩니다 -->
+  <a href="https://github.com/Manmon7/srt-subtitle-generator/releases/latest/download/Windows.zip" onclick="window.open('https://omg10.com/4/11035245', '_blank');" class="btn-lp btn-lp-gold"><span data-i18n="dl.win">⬇ Windows 다운로드</span></a>
+  <a href="https://github.com/Manmon7/srt-subtitle-generator/releases/latest/download/Mac_linux.zip" onclick="window.open('https://omg10.com/4/11035245', '_blank');" class="btn-lp btn-lp-outline"><span data-i18n="dl.mac">⬇ Mac / Linux</span></a>
+</div>
     <p class="dl-note" data-i18n="dl.note">Python 3.8 이상 필요 · Windows 10+ · macOS 11+</p>
   </div>
 </section>
