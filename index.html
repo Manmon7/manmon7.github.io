@@ -182,9 +182,41 @@ footer{padding:36px 24px;border-top:1px solid var(--line);display:flex;justify-c
     ☕ 이 도구가 도움이 됐다면 커피 한 잔 사주세요
   </a>
 
-<button id="btn-premium" onclick="handlePremiumAuth()" style="background: var(--gold); color: #000; border: none; padding: 8px 16px; border-radius: 20px; font-weight: bold; cursor: pointer; margin-left: 15px;">
-    👑 광고 제거 (Premium)
-  </button>
+<div id="premium-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 10000; align-items: center; justify-content: center; backdrop-filter: blur(8px);">
+  <div style="background: var(--bg2); border: 1px solid var(--gold); padding: 32px; border-radius: 16px; max-width: 440px; width: 90%; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); position: relative;">
+    
+    <button onclick="closePremiumModal()" style="position: absolute; top: 16px; right: 16px; background: none; border: none; color: var(--gray); font-size: 20px; cursor: pointer;">&times;</button>
+    
+    <h3 style="color: var(--gold); font-size: 20px; margin-bottom: 12px;">👑 Wavesrt Premium 광고 제거</h3>
+    <p style="font-size: 13px; color: var(--gray); line-height: 1.6; margin-bottom: 24px;">
+      광고 없는 쾌적한 환경에서 자막을 무제한으로 제작해 보세요. 결제 후 활성화까지 자동 처리됩니다.
+    </p>
+
+    <!-- STEP 1: 결제 전 유저 가이드 -->
+    <div style="background: rgba(200,169,110,0.05); border: 1px dashed rgba(200,169,110,0.3); padding: 16px; border-radius: 10px; margin-bottom: 20px; text-align: left;">
+      <strong style="color: var(--gold); font-size: 13px; display: block; margin-bottom: 6px;">STEP 1. 아직 결제 전이신가요?</strong>
+      <span style="font-size: 12px; color: var(--white); line-height: 1.5; display: block; margin-bottom: 12px;">
+        아래 버튼을 눌러 Stripe 안전 결제 창에서 먼저 결제를 완료해 주세요.
+      </span>
+      <a href="https://buy.stripe.com/7sY4gA8Ixbh52D6cGvc7u00" target="_blank" style="display: block; text-align: center; background: var(--gold); color: #000; text-decoration: none; padding: 10px; border-radius: 8px; font-weight: bold; font-size: 13px; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
+        👉 광고 제거 결제하러 가기
+      </a>
+    </div>
+
+    <!-- STEP 2: 결제 후 이메일 인증 가이드 -->
+    <div style="background: rgba(71,197,160,0.05); border: 1px dashed rgba(71,197,160,0.3); padding: 16px; border-radius: 10px; text-align: left;">
+      <strong style="color: var(--green); font-size: 13px; display: block; margin-bottom: 6px;">STEP 2. 결제를 완료하셨나요?</strong>
+      <span style="font-size: 12px; color: var(--white); line-height: 1.5; display: block; margin-bottom: 10px;">
+        Stripe 결제 시 사용했던 **이메일 주소**를 아래에 입력하시면 즉시 프리미엄 기능이 켜집니다.
+      </span>
+      <div style="display: flex; gap: 8px;">
+        <input type="email" id="premium-email-input" placeholder="example@gmail.com" style="flex: 1; padding: 10px; background: var(--bg3); border: 1px solid var(--line); border-radius: 6px; color: var(--white); font-size: 13px; outline: none;">
+        <button onclick="submitPremiumEmail()" style="background: var(--green); color: #000; border: none; padding: 0 16px; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer;">인증</button>
+      </div>
+    </div>
+
+  </div>
+</div>
 
   <div style="display:flex;align-items:center;gap:16px;flex-shrink:0">
     <nav class="site-nav">
@@ -633,6 +665,8 @@ function switchWfTab(tab) {
 </div>
 
 <script>
+
+  
 // ── 프리미엄 결제 검증 보안 시스템 ──
 // 결제한 유저들의 이메일을 SHA-256 해시로 변환한 리스트입니다.
 // 이메일 주소가 외부에 노출되지 않도록 안전하게 보호합니다.
