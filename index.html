@@ -184,7 +184,6 @@ footer{padding:36px 24px;border-top:1px solid var(--line);display:flex;justify-c
       ☕ 이 도구가 도움이 됐다면 커피 한 잔 사주세요
     </a>
 
-    <!-- 👑 결제 안내 팝업을 열어주는 핵심 실물 프리미엄 버튼 코드 복원 완료 -->
     <button id="btn-premium" onclick="openPremiumModal()" style="background: var(--gold); color: #000; border: none; padding: 8px 16px; border-radius: 20px; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;">
       👑 광고 제거 (Premium)
     </button>
@@ -568,29 +567,12 @@ footer{padding:36px 24px;border-top:1px solid var(--line);display:flex;justify-c
           <span style="display:inline-flex;font-family:'DM Mono',monospace;font-size:9px;padding:2px 8px;border-radius:99px;background:rgba(71,197,232,.12);border:1px dashed rgba(71,197,232,.3);color:#47c5e8;margin-bottom:8px">🌐 WEB</span>
           <div style="font-size:13px;font-weight:600;margin-bottom:6px;line-height:1.3" data-i18n="workflow.v.step4.title">자막 미세 조정<br><span style="font-size:11px;font-weight:400;color:var(--gray)">(선택)</span></div>
           <div style="font-size:12px;color:var(--gray);line-height:1.7" data-i18n="workflow.v.step4.desc">조정된 자막을 웹에서 추가 편집하거나 형식 변환할 수 있습니다.</div>
-          <button onclick="goToTab('txt2srt')" style="margin-top:10px;font-family:'DM Mono',monospace;font-size:10px;color:var(--gray);background:none;border:1px dashed var(--line2);border-radius:6px;padding:4px 10px;cursor:pointer" data-i18n="workflow.v.step4.btn">스크립트 편집 →</button>
+          <button onclick="goToTab('txt2srt')" style="margin-top:10px;font-family:'DM Mono',monospace;font-size:10px;color:var(--gray);background:none;border:1px solid var(--line2);border-radius:6px;padding:4px 10px;cursor:pointer" data-i18n="workflow.v.step4.btn">스크립트 편집 →</button>
         </div>
       </div>
     </div>
   </div>
 </div>
-
-<script>
-function switchWfTab(tab) {
-  const isAudio = tab === 'audio';
-  document.getElementById('wf-audio').style.display = isAudio ? 'block' : 'none';
-  document.getElementById('wf-video').style.display = isAudio ? 'none' : 'block';
-  const at = document.getElementById('wf-tab-audio'), vt = document.getElementById('wf-tab-video');
-  at.style.borderColor = isAudio ? 'var(--gold)' : 'var(--line2)';
-  at.style.background  = isAudio ? 'rgba(200,169,110,.15)' : 'transparent';
-  at.style.color       = isAudio ? 'var(--gold)' : 'var(--gray)';
-  at.style.fontWeight  = isAudio ? '700' : '400';
-  vt.style.borderColor = isAudio ? 'var(--line2)' : 'var(--gold)';
-  vt.style.background  = isAudio ? 'transparent' : 'rgba(200,169,110,.15)';
-  vt.style.color       = isAudio ? 'var(--gray)' : 'var(--gold)';
-  vt.style.fontWeight  = isAudio ? '400' : '700';
-}
-</script>
 
 <!-- 랜딩 -->
 <div class="divider-section">
@@ -671,7 +653,7 @@ function switchWfTab(tab) {
 <script>
 // ── 프리미엄 결제 검증 보안 시스템 ──
 const PREMIUM_HASHES = [
-  "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08", // 예시 해시 값 ('abc')
+  "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08", // 'abc' 해시 데이터
   "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
 ];
 
@@ -695,7 +677,6 @@ function updatePremiumUI() {
 }
 document.addEventListener('DOMContentLoaded', updatePremiumUI);
 
-// 모달 제어 함수들
 function openPremiumModal() {
   if (isPremiumUser) return;
   document.getElementById('premium-modal').style.display = 'flex';
@@ -705,7 +686,6 @@ function closePremiumModal() {
   document.getElementById('premium-modal').style.display = 'none';
 }
 
-// 이메일 인증 제출 처리 함수
 async function submitPremiumEmail() {
   const emailInput = document.getElementById('premium-email-input');
   const email = emailInput ? emailInput.value.trim() : '';
@@ -727,34 +707,29 @@ async function submitPremiumEmail() {
   }
 }
 
-// 광고 실행 분기 유틸리티 함수
 function triggerAdPopup() {
   if (!isPremiumUser) {
     window.open("https://omg10.com/4/11035245", "_blank");
   }
 }
 
-// 프로그램 다운로드 버튼 전용 광고 연동 핸들러
 function handleDownloadAd(event, downloadUrl) {
-  event.preventDefault(); // 기본 이동 차단 후 스크립트 제어
-  triggerAdPopup();       // 프리미엄 아니면 광고 오픈
+  event.preventDefault();
+  triggerAdPopup();
   
   const a = document.createElement('a');
   a.href = downloadUrl;
   a.click();
 }
 
-
 const RENDER_URL = 'https://9mcwy3i0wx.onrender.com';
 const state = { retime:'', txt2srt:'', silence:'' };
 let silenceAudioBuffer = null, detectedSilences = [], cleanAudioBuffer = null;
-// 클린 오디오 플레이어 전용 변수
 let _cleanBuffer = null, _cleanSubtitles = [];
 let _cleanCtx = null, _cleanSource = null;
 let _cleanOffset = 0, _cleanStartTime = 0, _cleanPlaying = false, _cleanAnimFrame = null;
 let silenceSrtText = '';
 
-// ── 탭 ──
 function switchTab(name) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
@@ -767,7 +742,6 @@ function goToTab(name) {
   document.getElementById('app').scrollIntoView({ behavior: 'smooth' });
 }
 
-// ── SRT 파일 로드 ──
 function loadSrtFile(input, targetId) {
   const file = input.files[0]; if (!file) return;
   const reader = new FileReader();
@@ -792,7 +766,6 @@ function updateSrtAccept(inputId, fmt) {
   if (el) el.accept = '.' + fmt;
 }
 
-// ── SRT 드롭존 드래그 앤 드롭 ──
 function initSrtDropzone(dzId, textareaId) {
   const dz = document.getElementById(dzId);
   if (!dz) return;
@@ -819,7 +792,6 @@ function initSrtDropzone(dzId, textareaId) {
 initSrtDropzone('dz-whisper', 'whisperSrtText');
 initSrtDropzone('dz-original', 'originalSrtText');
 
-// ── 무음 삭제 다중 파일 드롭존 ──
 const dzSilence = document.getElementById('dz-silence');
 dzSilence.addEventListener('dragover', e => { e.preventDefault(); dzSilence.classList.add('over'); });
 dzSilence.addEventListener('dragleave', () => dzSilence.classList.remove('over'));
@@ -840,8 +812,8 @@ async function handleSilenceFiles(files) {
   document.getElementById('silenceExportBtn').style.display = 'none';
   document.getElementById('silenceRemoveBtn').style.display = 'none';
 
-  if (!_previewCtx || _previewCtx.state === 'closed') {
-    _previewCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (!window._previewCtx || window._previewCtx.state === 'closed') {
+    window._previewCtx = new (window.AudioContext || window.webkitAudioContext)();
   }
 
   for (const file of files) {
@@ -859,7 +831,7 @@ async function handleSilenceFiles(files) {
       reader.readAsText(file, 'utf-8');
       chip.textContent = '📄 ' + file.name;
     } else {
-      silenceAudioBuffer = await _previewCtx.decodeAudioData(await file.arrayBuffer());
+      silenceAudioBuffer = await window._previewCtx.decodeAudioData(await file.arrayBuffer());
       chip.textContent = '🎧 ' + file.name;
     }
     chips.appendChild(chip);
@@ -872,7 +844,6 @@ async function handleSilenceFiles(files) {
   }
 }
 
-// ── SRT 렌더 ──
 function renderSRT(srt, targetId) {
   const el = document.getElementById(targetId);
   let html = '';
@@ -885,7 +856,6 @@ function renderSRT(srt, targetId) {
   el.innerHTML = html;
 }
 
-// ── 복사 / 다운로드 ──
 async function copyResult(key) {
   await navigator.clipboard.writeText(state[key]);
   const map = { retime:'retimeResult', txt2srt:'txt2srtResult', silence:'silenceResult' };
@@ -914,13 +884,11 @@ function downloadResult(key) {
   URL.revokeObjectURL(a.href);
 }
 
-// ── 시간 포맷 ──
 function secToSrtTime(sec) {
   const h = Math.floor(sec/3600), m = Math.floor((sec%3600)/60), s = Math.floor(sec%60), ms = Math.round((sec%1)*1000);
   return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')},${String(ms).padStart(3,'0')}`;
 }
 
-// ══ 1. 싱크 합치기 ══
 async function retimeSRT() {
   const errEl = document.getElementById('retimeError');
   const resEl = document.getElementById('retimeResult');
@@ -971,7 +939,6 @@ async function retimeSRT() {
   }
 }
 
-// ══ 2. 텍스트 → SRT ══
 let currentSegments = [];
 
 function koreanLen(text) {
@@ -1053,7 +1020,6 @@ async function convertTxt() {
   }
 }
 
-// 에디터 컴포넌트 렌더러
 function renderSegEditor() {
   const totalDur = parseFloat(document.getElementById('txt2srtDuration').value) || 60;
   const totalChars = currentSegments.reduce((a,s) => a + koreanLen(s), 0);
@@ -1155,7 +1121,994 @@ function buildSrtFromSegs() {
   document.getElementById('txt2srtResult').style.display='block';
 }
 
-document.addEventListener('DOMContentLoaded', () => applyLang(currentLang));
+function adjustSubtitleLocally(srtText, silences) {
+  if (!srtText || !silences || silences.length === 0) return srtText;
+
+  function adjustTime(t) {
+    let shift = 0;
+    for (const s of silences) {
+      if (t > s.end)        shift += s.end - s.start;
+      else if (t > s.start) shift += t - s.start;
+    }
+    return Math.max(0, t - shift);
+  }
+
+  // 내부 헬퍼 함수 시간 파싱
+  function pTime(str) {
+    const [hms, ms] = str.split(',');
+    const [h, m, s] = hms.split(':').map(Number);
+    return h*3600 + m*60 + s + parseInt(ms)/1000;
+  }
+
+  function fTime(sec) {
+    sec = Math.max(0, sec);
+    const h  = Math.floor(sec/3600);
+    const m  = Math.floor((sec%3600)/60);
+    const s  = Math.floor(sec%60);
+    const ms = Math.round((sec%1)*1000);
+    return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')},${String(ms).padStart(3,'0')}`;
+  }
+
+  const blocks = srtText.trim().split(/\n\s*\n/);
+  const result = [];
+  let idx = 1;
+  for (const block of blocks) {
+    const lines = block.trim().split('\n');
+    if (lines.length < 3) continue;
+    const m = lines[1].match(/(\d{2}:\d{2}:\d{2},\d{3})\s*-->\s*(\d{2}:\d{2}:\d{2},\d{3})/);
+    if (!m) continue;
+    const newStart = adjustTime(pTime(m[1]));
+    const newEnd   = adjustTime(pTime(m[2]));
+    if (newEnd > newStart) {
+      result.push(`${idx}\n${fTime(newStart)} --> ${fTime(newEnd)}\n${lines.slice(2).join('\n')}`);
+      idx++;
+    }
+  }
+  return result.join('\n\n');
+}
+
+function detectSilences() {
+  if (!silenceAudioBuffer) return;
+  const threshold = parseFloat(document.getElementById('silenceThreshold').value);
+  const minDur    = parseFloat(document.getElementById('silenceMinDur').value);
+  const data = silenceAudioBuffer.getChannelData(0), sr = silenceAudioBuffer.sampleRate;
+  const ws = Math.floor(sr*0.02);
+  const sils = [];
+  let isSil = false, silStart = 0;
+  for (let i=0; i<data.length; i+=ws) {
+    let sq=0; const end=Math.min(i+ws,data.length);
+    for (let j=i;j<end;j++) sq+=data[j]*data[j];
+    const rms=Math.sqrt(sq/(end-i)), t=i/sr;
+    if (rms<threshold) { if (!isSil){isSil=true;silStart=t;} }
+    else { if (isSil){isSil=false;if(t-silStart>=minDur)sils.push({start:silStart,end:t});} }
+  }
+  if (isSil){const d=data.length/sr-silStart;if(d>=minDur)sils.push({start:silStart,end:data.length/sr});}
+  detectedSilences=sils;
+  const list=document.getElementById('silenceList');
+  list.innerHTML=sils.length===0
+    ?'<div style="font-size:12px;color:var(--gray);padding:8px">감지된 무음 구간이 없어요</div>'
+    :sils.map((s,i)=>`<div class="silence-item"><span>${i+1}. ${s.start.toFixed(2)}s ~ ${s.end.toFixed(2)}s</span><span>${(s.end-s.start).toFixed(2)}s</span></div>`).join('');
+  const total=sils.reduce((a,s)=>a+(s.end-s.start),0);
+  const stats=document.getElementById('silenceStats');
+  stats.style.display='block';
+  stats.textContent=`감지: ${sils.length}개 / 총 ${total.toFixed(2)}초 제거 예정`;
+  if (sils.length > 0) {
+    document.getElementById('silenceRemoveBtn').style.display='flex';
+    document.getElementById('silenceExportBtn').style.display='none';
+  }
+  initPreviewPlayer(silenceAudioBuffer, silenceSrtText, '원본 오디오 미리보기 (무음 구간 확인)');
+}
+
+let parsedSubtitles = [];
+
+function drawWaveform(buffer, silences, currentTime) {
+  const canvas = document.getElementById('waveformCanvas');
+  if (!canvas || !buffer) return;
+  canvas.width = (canvas.offsetWidth || 800) * (window.devicePixelRatio || 1);
+  const ctx2 = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+  const data = buffer.getChannelData(0);
+  const step = Math.ceil(data.length / w);
+  const amp = h / 2;
+  ctx2.clearRect(0,0,w,h);
+  for (const s of (silences||[])) {
+    const x1 = (s.start / buffer.duration) * w;
+    const x2 = (s.end   / buffer.duration) * w;
+    ctx2.fillStyle = 'rgba(232,71,71,0.18)';
+    ctx2.fillRect(x1, 0, x2-x1, h);
+  }
+  ctx2.beginPath(); ctx2.strokeStyle='#4a90d9'; ctx2.lineWidth=1;
+  for (let i=0; i<w; i++) {
+    let mn=1, mx=-1;
+    for (let j=0; j<step; j++) {
+      const d=data[i*step+j]; if(d===undefined)break;
+      if(d<mn)mn=d; if(d>mx)mx=d;
+    }
+    ctx2.moveTo(i,(1+mn)*amp); ctx2.lineTo(i,(1+mx)*amp);
+  }
+  ctx2.stroke();
+  if (currentTime > 0) {
+    const px = (currentTime / buffer.duration) * w;
+    ctx2.beginPath(); ctx2.strokeStyle='#c8a96e'; ctx2.lineWidth=2;
+    ctx2.moveTo(px,0); ctx2.lineTo(px,h); ctx2.stroke();
+  }
+}
+
+function seekCanvas(e) {
+  if (!_previewBuffer) return;
+  const rect = e.currentTarget.getBoundingClientRect();
+  const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+  const seekTime = ratio * _previewBuffer.duration;
+  if (_previewPlaying) {
+    stopPreview();
+    _previewOffset = seekTime;
+    startPreview();
+  } else {
+    _previewOffset = seekTime;
+    drawWaveform(_previewBuffer, detectedSilences, seekTime);
+    updateSubtitleDisplay(seekTime);
+    document.getElementById('previewTime').textContent = formatPreviewTime(seekTime);
+  }
+}
+
+function updateSubtitleDisplay(t) {
+  const el = document.getElementById('currentSubtitleDisplay');
+  if (!el || parsedSubtitles.length === 0) return;
+  const sub = parsedSubtitles.find(s => t >= s.start && t <= s.end);
+  if (sub) { el.textContent = sub.text; el.style.color='var(--white)'; }
+  else { el.textContent='—'; el.style.color='var(--gray2)'; }
+}
+
+function formatPreviewTime(sec) {
+  const m=Math.floor(sec/60), s=Math.floor(sec%60), ms=Math.floor((sec%1)*100);
+  return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')+'.'+String(ms).padStart(2,'0');
+}
+
+function startPreview() {
+  if (!_previewBuffer || !window._previewCtx) return;
+  const playFn = () => {
+    if (_previewSource) {
+      try{_previewSource.stop();}catch(e){}
+      try{_previewSource.disconnect();}catch(e){}
+      _previewSource = null;
+    }
+    _previewSource = window._previewCtx.createBufferSource();
+    _previewSource.buffer = _previewBuffer;
+    _previewSource.connect(window._previewCtx.destination);
+    _previewStartTime = window._previewCtx.currentTime - Math.max(0, _previewOffset);
+    _previewSource.start(0, Math.max(0, _previewOffset));
+    _previewPlaying = true;
+    document.getElementById('previewPlayBtn').textContent = '⏸ 일시정지';
+
+    _previewSource.onended = () => {
+      if (_previewPlaying) {
+        _previewPlaying = false; _previewOffset = 0;
+        cancelAnimationFrame(_animFrame);
+        document.getElementById('previewPlayBtn').textContent = '▶ 재생';
+        document.getElementById('previewTime').textContent = '00:00.00';
+        drawWaveform(_previewBuffer, detectedSilences, 0);
+      }
+    };
+    const loop = () => {
+      if (!_previewPlaying) return;
+      const t = window._previewCtx.currentTime - _previewStartTime;
+      _previewOffset = t;
+      drawWaveform(_previewBuffer, detectedSilences, t);
+      updateSubtitleDisplay(t);
+      document.getElementById('previewTime').textContent = formatPreviewTime(t);
+      _animFrame = requestAnimationFrame(loop);
+    };
+    _animFrame = requestAnimationFrame(loop);
+  };
+
+  if (window._previewCtx.state === 'suspended') {
+    window._previewCtx.resume().then(playFn);
+  } else {
+    playFn();
+  }
+}
+
+function stopPreview() {
+  _previewPlaying = false;
+  cancelAnimationFrame(_animFrame);
+  if (_previewSource) {
+    try{_previewSource.stop();}catch(e){}
+    try{_previewSource.disconnect();}catch(e){}
+    _previewSource = null;
+  }
+  document.getElementById('previewPlayBtn').textContent = '▶ 재생';
+}
+
+function togglePreview() {
+  if (_previewPlaying) stopPreview();
+  else startPreview();
+}
+
+function initPreviewPlayer(buffer, subtitleText, titleText) {
+  _previewBuffer = buffer;
+  window._cleanPlayBuffer = null;
+  parsedSubtitles = parseSrtForPreview(subtitleText);
+  if (!window._previewCtx || window._previewCtx.state === 'closed') {
+    window._previewCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+
+  const card = document.getElementById('silencePreviewCard');
+  const titleEl = card.querySelector('.card-title span');
+  if (titleEl) titleEl.textContent = titleText || '오디오 미리보기';
+
+  const subDisplay = document.getElementById('currentSubtitleDisplay');
+  if (parsedSubtitles.length > 0) {
+    subDisplay.style.display = 'block';
+    subDisplay.textContent = '▶ 재생하면 자막이 표시됩니다';
+  } else {
+    subDisplay.style.display = 'none';
+  }
+
+  card.style.display = 'block';
+  _previewOffset = 0;
+  _previewPlaying = false;
+  document.getElementById('previewPlayBtn').textContent = '▶ 재생';
+  document.getElementById('previewTime').textContent = '00:00.00';
+
+  setTimeout(() => drawWaveform(buffer, detectedSilences, 0), 80);
+  document.getElementById('waveformCanvas').onclick = seekCanvas;
+}
+
+function initCleanPreviewPlayer(buffer, srt) {
+  _cleanBuffer = buffer;
+  _cleanSubtitles = parseSrtForPreview(srt);
+  if (!_cleanCtx || _cleanCtx.state === 'closed') {
+    _cleanCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+
+  const card = document.getElementById('cleanPreviewCard');
+  card.style.display = 'block';
+
+  const subDisplay = document.getElementById('cleanSubtitleDisplay');
+  if (_cleanSubtitles.length > 0) {
+    subDisplay.style.display = 'block';
+    subDisplay.textContent = '▶ 재생하면 조정된 자막이 표시됩니다';
+  } else {
+    subDisplay.style.display = 'none';
+  }
+
+  _cleanOffset = 0;
+  _cleanPlaying = false;
+  document.getElementById('cleanPlayBtn').textContent = '▶ 재생';
+  document.getElementById('cleanPreviewTime').textContent = '00:00.00';
+
+  setTimeout(() => drawCleanWaveform(0), 80);
+
+  document.getElementById('cleanWaveformCanvas').onclick = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    const seekTime = ratio * _cleanBuffer.duration;
+    if (_cleanPlaying) { stopCleanPreview(); _cleanOffset = seekTime; startCleanPreview(); }
+    else {
+      _cleanOffset = seekTime;
+      drawCleanWaveform(seekTime);
+      updateCleanSubtitle(seekTime);
+      document.getElementById('cleanPreviewTime').textContent = formatPreviewTime(seekTime);
+    }
+  };
+}
+
+function drawCleanWaveform(currentTime) {
+  const canvas = document.getElementById('cleanWaveformCanvas');
+  if (!canvas || !_cleanBuffer) return;
+  canvas.width = (canvas.offsetWidth || 800) * (window.devicePixelRatio || 1);
+  const ctx2 = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+  const data = _cleanBuffer.getChannelData(0);
+  const step = Math.ceil(data.length / w);
+  const amp = h / 2;
+  ctx2.clearRect(0,0,w,h);
+  ctx2.beginPath(); ctx2.strokeStyle='#47c5a0'; ctx2.lineWidth=1;
+  for (let i=0; i<w; i++) {
+    let mn=1, mx=-1;
+    for (let j=0; j<step; j++) {
+      const d=data[i*step+j]; if(d===undefined)break;
+      if(d<mn)mn=d; if(d>mx)mx=d;
+    }
+    ctx2.moveTo(i,(1+mn)*amp); ctx2.lineTo(i,(1+mx)*amp);
+  }
+  ctx2.stroke();
+  if (currentTime > 0) {
+    const px = (currentTime / _cleanBuffer.duration) * w;
+    ctx2.beginPath(); ctx2.strokeStyle='#c8a96e'; ctx2.lineWidth=2;
+    ctx2.moveTo(px,0); ctx2.lineTo(px,h); ctx2.stroke();
+  }
+}
+
+function updateCleanSubtitle(t) {
+  const el = document.getElementById('cleanSubtitleDisplay');
+  if (!el || _cleanSubtitles.length === 0) return;
+  const sub = _cleanSubtitles.find(s => t >= s.start && t <= s.end);
+  if (sub) { el.textContent = sub.text; el.style.color='var(--white)'; }
+  else { el.textContent='—'; el.style.color='var(--gray2)'; }
+}
+
+function startCleanPreview() {
+  if (!_cleanBuffer) return;
+  if (!_cleanCtx || _cleanCtx.state === 'closed') {
+    _cleanCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  const playFn = () => {
+    if (_cleanSource) {
+      try{_cleanSource.stop();}catch(e){}
+      try{_cleanSource.disconnect();}catch(e){}
+      _cleanSource = null;
+    }
+    _cleanSource = _cleanCtx.createBufferSource();
+    _cleanSource.buffer = _cleanBuffer;
+    _cleanSource.connect(_cleanCtx.destination);
+    _cleanStartTime = _cleanCtx.currentTime - Math.max(0, _cleanOffset);
+    _cleanSource.start(0, Math.max(0, _cleanOffset));
+    _cleanPlaying = true;
+    document.getElementById('cleanPlayBtn').textContent = '⏸ 일시정지';
+
+    _cleanSource.onended = () => {
+      if (_cleanPlaying) {
+        _cleanPlaying = false; _cleanOffset = 0;
+        cancelAnimationFrame(_cleanAnimFrame);
+        document.getElementById('cleanPlayBtn').textContent = '▶ 재생';
+        document.getElementById('cleanPreviewTime').textContent = '00:00.00';
+        drawCleanWaveform(0);
+        const sub = document.getElementById('cleanSubtitleDisplay');
+        if (sub && _cleanSubtitles.length > 0) sub.textContent = '▶ 재생하면 조정된 자막이 표시됩니다';
+      }
+    };
+    const loop = () => {
+      if (!_cleanPlaying) return;
+      const t = _cleanCtx.currentTime - _cleanStartTime;
+      _cleanOffset = t;
+      drawCleanWaveform(t);
+      updateCleanSubtitle(t);
+      document.getElementById('cleanPreviewTime').textContent = formatPreviewTime(t);
+      _cleanAnimFrame = requestAnimationFrame(loop);
+    };
+    _cleanAnimFrame = requestAnimationFrame(loop);
+  };
+
+  if (_cleanCtx.state === 'suspended') {
+    _cleanCtx.resume().then(playFn);
+  } else {
+    playFn();
+  }
+}
+
+function stopCleanPreview() {
+  _cleanPlaying = false;
+  cancelAnimationFrame(_cleanAnimFrame);
+  if (_cleanSource) {
+    try { _cleanSource.stop(); } catch(e){}
+    try { _cleanSource.disconnect(); } catch(e){}
+    _cleanSource = null;
+  }
+  document.getElementById('cleanPlayBtn').textContent = '▶ 재생';
+}
+
+function toggleCleanPreview() {
+  if (_cleanPlaying) stopCleanPreview();
+  else startCleanPreview();
+}
+
+async function removeSilenceAndPlay() {
+  const errEl = document.getElementById('silenceError');
+  const btn   = document.getElementById('silenceRemoveBtn');
+  errEl.style.display = 'none';
+
+  if (!silenceAudioBuffer) {
+    errEl.textContent = '⚠ 오디오 파일을 먼저 업로드해주세요';
+    errEl.style.display = 'block'; return;
+  }
+
+  if (detectedSilences.length === 0) {
+    detectSilences();
+    if (detectedSilences.length === 0) {
+      errEl.textContent = '⚠ 감지된 무음 구간이 없어요. 임계값을 높여보세요.';
+      errEl.style.display = 'block'; return;
+    }
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '⏳ 처리 중...';
+
+  try {
+    const totalDur = silenceAudioBuffer.duration;
+    const keepSegs = [];
+    let lastEnd = 0;
+    for (const s of detectedSilences) {
+      if (s.start > lastEnd) keepSegs.push({start: lastEnd, end: s.start});
+      lastEnd = s.end;
+    }
+    if (lastEnd < totalDur) keepSegs.push({start: lastEnd, end: totalDur});
+
+    const cleanDur = keepSegs.reduce((a, s) => a + (s.end - s.start), 0);
+    const offCtx = new OfflineAudioContext(
+      silenceAudioBuffer.numberOfChannels,
+      Math.ceil(cleanDur * silenceAudioBuffer.sampleRate),
+      silenceAudioBuffer.sampleRate
+    );
+    let cur = 0;
+    for (const seg of keepSegs) {
+      const d = seg.end - seg.start;
+      const src = offCtx.createBufferSource();
+      src.buffer = silenceAudioBuffer;
+      src.connect(offCtx.destination);
+      src.start(cur, seg.start, d);
+      cur += d;
+    }
+    cleanAudioBuffer = await offCtx.startRendering();
+
+    let adjustedSrt = '';
+    if (silenceSrtText) {
+      adjustedSrt = adjustSubtitleLocally(silenceSrtText, detectedSilences);
+      state.silence = adjustedSrt;
+    }
+
+    initCleanPreviewPlayer(cleanAudioBuffer, adjustedSrt || silenceSrtText);
+    document.getElementById('silenceExportBtn').style.display = 'flex';
+
+  } catch(e) {
+    errEl.textContent = '⚠ ' + e.message;
+    errEl.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '▶ 무음 제거 후 미리보기';
+  }
+}
+
+async function exportSilence() {
+  const errEl = document.getElementById('silenceError');
+  const btn   = document.getElementById('silenceExportBtn');
+  errEl.style.display = 'none';
+
+  if (!cleanAudioBuffer && !silenceAudioBuffer) {
+    errEl.textContent = '⚠ 먼저 무음 제거 후 미리보기를 실행해주세요';
+    errEl.style.display = 'block'; return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '⏳ 처리 중...';
+
+  try {
+    if (!cleanAudioBuffer) {
+      const totalDur = silenceAudioBuffer.duration;
+      const keepSegs = [];
+      let lastEnd = 0;
+      for (const s of detectedSilences) {
+        if (s.start > lastEnd) keepSegs.push({start: lastEnd, end: s.start});
+        lastEnd = s.end;
+      }
+      if (lastEnd < totalDur) keepSegs.push({start: lastEnd, end: totalDur});
+      const cleanDur = keepSegs.reduce((a,s) => a+(s.end-s.start), 0);
+      const offCtx = new OfflineAudioContext(
+        silenceAudioBuffer.numberOfChannels,
+        Math.ceil(cleanDur * silenceAudioBuffer.sampleRate),
+        silenceAudioBuffer.sampleRate
+      );
+      let cursor = 0;
+      for (const seg of keepSegs) {
+        const d = seg.end - seg.start;
+        const src = offCtx.createBufferSource();
+        src.buffer = silenceAudioBuffer; src.connect(offCtx.destination);
+        src.start(cursor, seg.start, d); cursor += d;
+      }
+      cleanAudioBuffer = await offCtx.startRendering();
+    }
+
+    if (!state.silence && silenceSrtText) {
+      state.silence = adjustSubtitleLocally(silenceSrtText, detectedSilences);
+    }
+
+    downloadCleanAudio();
+
+    if (state.silence) {
+      const fmt = document.getElementById('silenceOutFmt')?.value || 'srt';
+      const blob = new Blob([state.silence], {type: 'text/plain;charset=utf-8'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'adjusted.' + fmt;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+  } catch(e) {
+    errEl.textContent = '⚠ ' + e.message;
+    errEl.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '⬇ 제거된 오디오 + 자막 다운로드';
+  }
+}
+
+// ══ 다국어 지원 번역 데이터셋 ══
+const I18N = {
+  ko: {
+    'nav.app': '앱 사용',
+    'nav.install': '설치 안내',
+    'nav.download': '다운로드',
+    'notice.text': '💡 <strong>음성 전사</strong>와 <strong>영상 무음제거</strong>는 로컬 설치 후 <a href="http://localhost:5000" target="_blank">localhost:5000</a>에서 사용하세요. 이 페이지에서는 <strong>싱크 합치기 · 스크립트→오리지널 자막 생성 · 무음 삭제</strong>를 설치 없이 바로 사용할 수 있어요. <a href="javascript:void(0)" onclick="document.getElementById(\'install\').scrollIntoView({behavior:\'smooth\'})">설치 안내 →</a>',
+    'tab.txt2srt': '📝 스크립트 → 오리지널 자막',
+    'tab.retime': '🔧 싱크 합치기',
+    'tab.silence': '✂️ 무음 삭제',
+    'txt2srt.card1': '원문 텍스트 입력',
+    'txt2srt.placeholder': '원문 텍스트를 입력하세요. 엔터로 직접 줄을 나눌 수도 있어요.',
+    'txt2srt.maxchars': '최대 글자 수 (한글 기준, 자동 분절 시 적용)',
+    'txt2srt.duration': '영상 총 길이 (초, 타임스탬프 계산용)',
+    'txt2srt.outfmt': '출력 자막 형식',
+    'txt2srt.editcard': '자막 줄 편집 — 엔터로 분할 · + 추가 · × 삭제',
+    'txt2srt.addtop': '+ 맨 위',
+    'txt2srt.reset': '↩ 다시 입력',
+    'txt2srt.build': '📝 SRT 생성',
+    'txt2srt.btn': '📝 자동 분절 후 편집',
+    'txt2srt.count': '자막 수',
+    'txt2srt.dur': '총 길이',
+    'txt2srt.copy': '📋 복사',
+    'txt2srt.dl': '⬇ 자막 다운로드',
+    'retime.whisper.title': 'WHISPER 자막 (타이밍 O, 오타 X)',
+    'retime.whisper.label': 'WHISPER.SRT',
+    'retime.whisper.ph': 'Whisper SRT를 붙여넣거나 파일을 드래그 / 클릭해서 열어주세요',
+    'retime.original.title': '원문 자막 (텍스트 O, 타이밍 X)',
+    'retime.original.label': 'ORIGINAL.SRT',
+    'retime.original.ph': '원문 SRT를 붙여넣거나 파일을 드래그 / 클릭해서 열어주세요',
+    'retime.outfmt': '출력 형식',
+    'retime.btn': '🔧 타이밍 재배분하기',
+    'retime.w': 'Whisper',
+    'retime.o': '원문',
+    'retime.c': '결과',
+    'retime.copy': '📋 복사',
+    'retime.dl': '⬇ SRT 다운로드',
+    'silence.upload.title': '오디오 파일 + 자막 파일을 함께 드래그하거나 클릭해서 선택',
+    'silence.upload.sub': '오디오: MP3, WAV, M4A 등 · 자막: .srt .vtt .ass .sbv (선택사항)',
+    'silence.settings.title': '무음 감지 설정',
+    'silence.threshold': '감지 임계값 (높을수록 더 많이 감지)',
+    'silence.mindur': '최소 무음 길이 (초)',
+    'silence.detect': '🔍 무음 구간 감지',
+    'silence.srt.title': '입력 자막',
+    'silence.preview.btn': '▶ 무음 제거 후 미리보기',
+    'silence.export.btn': '⬇ 제거된 오디오 + 자막 다운로드',
+    'silence.removed': '제거된 무음',
+    'silence.adj': '자막 조정',
+    'silence.video.notice': '📹 <strong>영상 무음삭제</strong>는 로컬에서 진행해주세요. <a href="http://localhost:5000" target="_blank">localhost:5000 →</a>',
+    'workflow.title': '쇼츠 / 영상 제작 워크플로우',
+    'workflow.subtitle': '미디어 종류에 따라 다른 경로를 선택하세요',
+    'workflow.badge.local.desc': '= 개인 PC (localhost:5000)',
+    'workflow.badge.web.desc': '= 이 페이지',
+    'workflow.tab.audio': '오디오 + 자막',
+    'workflow.tab.video': '영상 + 자막',
+    'workflow.step1.title': '음성 추출 및<br>자막 생성',
+    'workflow.step1.desc': '개인 PC에서 Whisper AI로 음성을 자막파일로 변환합니다.',
+    'workflow.step2.title': '대본 최적화 및<br>싱크 결합',
+    'workflow.step2.desc': '오리지널 자막을 생성하고 Whisper 자막과 매칭해 정확한 싱크를 완성합니다.',
+    'workflow.step3.title': '무음 구간<br>자동 컷편집',
+    'workflow.step3.desc': '완성된 자막 기준으로 무음 구간을 감지하고 한 번에 삭제합니다.',
+    'workflow.step2.btn': '싱크 합치기 →',
+    'workflow.step3.btn': '무음 삭제 →',
+    'workflow.v.step1.title': '음성 추출 및<br>자막 생성',
+    'workflow.v.step1.desc': 'Whisper AI로 영상에서 음성을 추출해 자막을 생성합니다.',
+    'workflow.v.step2.title': '대본 최적화 및<br>싱크 결합',
+    'workflow.v.step2.desc': '오리지널 자막을 생성하고 Whisper 자막과 매칭해 싱크를 완성합니다.',
+    'workflow.v.step3.title': '영상 무음 삭제<br><span style="font-size:11px;font-weight:400;color:var(--gray)">(로컬로 복귀)</span>',
+    'workflow.v.step3.desc': '영상 파일은 로컬에서 처리합니다. 완성된 싱크 자막을 넣으면 타임스탬프도 자동 조정됩니다.',
+    'workflow.v.step3.btn': '영상 무음 삭제 →',
+    'workflow.v.step4.title': '자막 미세 조정<br><span style="font-size:11px;font-weight:400;color:var(--gray)">(선택)</span>',
+    'workflow.v.step4.desc': '조정된 자막을 웹에서 추가 편집하거나 형식 변환할 수 있습니다.',
+    'workflow.v.step4.btn': '스크립트 편집 →',
+    'hero.eyebrow': 'Free · Local AI · No API Key · Multi-Format',
+    'hero.title': '무료 무제한<span>자동자막 생성기</span>',
+    'hero.sub': 'Whisper AI가 음성을 전사하고, 원문 스크립트와 타이밍을 자동으로 싱크합니다.',
+    'hero.use': '⬆ 앱 바로 사용',
+    'hero.dl': '⬇ 다운로드',
+    'feat.title': '핵심 기능',
+    'feat1.title': 'Whisper AI 자동 전사', 'feat1.desc': '로컬 Whisper AI로 음성을 전사하고 자연스럽게 분절합니다.',
+    'feat2.title': '스크립트 → 오리지널 자막', 'feat2.desc': '스크립트를 자막 형식으로 자동 분절. 글자 수 기준 타임스탬프 자동 부여.',
+    'feat3.title': '원문 스크립트 싱크', 'feat3.desc': 'Whisper 타이밍 + 오리지널 자막을 자동 매핑. 오타 없는 정확한 자막.',
+    'feat4.title': '무음 구간 제거', 'feat4.desc': '호흡, 무음 감지 후 제거. 오디오/영상과 자막이 함께 조정됩니다.',
+    'feat5.title': '다양한 자막 형식', 'feat5.desc': 'SRT, VTT, ASS, SBV 등 모든 편집 프로그램 호환 형식 지원.',
+    'feat6.title': '완전 무료', 'feat6.desc': '구독 없음. 데이터 외부 전송 없음. API 키 불필요.',
+    'compare.title': '왜 <em>무료 무제한 자동자막 생성기</em>인가요?',
+    'install.title': '설치 방법 (음성 전사 기능)',
+    'install.step1.title': 'Python 설치', 'install.step1.desc': '설치 시 반드시 <strong style="color:var(--gold)">"Add Python to PATH"</strong> 체크!',
+    'install.step2.title': '무료 무제한 자동자막 생성기 다운로드', 'install.step2.desc': '아래 다운로드 버튼에서 운영체제에 맞는 파일을 받으세요.',
+    'install.step2.link': '→ 다운로드 섹션으로 이동',
+    'install.win.setup': 'Windows: setup.bat 더블클릭',
+    'install.mac.setup': 'Mac/Linux: bash setup.sh',
+    'install.win.start': 'Windows: start.bat 더블클릭',
+    'install.mac.start': 'Mac/Linux: bash start.sh',
+    'install.localhost': '→ 실행 후 localhost:5000 접속',
+    'install.first': '처음 설치: setup.bat',
+    'install.daily': '매일 사용: start.bat',
+    'txt2srt.card1': '원문 텍스트 입력',
+    'txt2srt.placeholder': '원문 텍스트를 입력하세요. 엔터로 직접 줄을 나눌 수도 있어요.',
+    'txt2srt.maxchars': '최대 글자 수 (한글 기준)',
+    'txt2srt.duration': '영상 총 길이 (초, 타임스탬프 계산용)',
+    'txt2srt.duration.ph': '예: 63',
+    'retime.whisper.title': 'Whisper SRT (타이밍 O, 오타 X)',
+    'retime.whisper.label': 'WHISPER 자막',
+    'retime.whisper.ph': 'Whisper SRT를 붙여넣거나 파일을 드래그 / 클릭해서 열어주세요',
+    'retime.original.title': '원문 SRT (텍스트 O, 타이밍 X)',
+    'retime.original.label': '원문 자막',
+    'retime.original.ph': '원문 SRT를 붙여넣거나 파일을 드래그 / 클릭해서 열어주세요',
+    'retime.outfmt': '출력 형식:',
+    'silence.upload.title': '오디오 + SRT 동시 첨부 (드래그 가능)',
+    'silence.upload.dztitle': '오디오 파일 + 자막 파일을 함께 드래그하거나 클릭해서 선택',
+    'silence.upload.sub': '오디오: MP3, WAV, M4A 등 · 자막: .srt .vtt .ass .sbv (선택사항)',
+    'silence.settings.title': '무음 감지 설정',
+    'silence.threshold': '감지 임계값 (높을수록 더 많이 감지)',
+    'silence.mindur': '최소 무음 길이 (초)',
+    'silence.outfmt': '출력 자막 형식:',
+    'silence.play': '▶ 재생',
+    'silence.preview.orig': '원본 오디오 미리보기 (빨간 구간 = 무음)',
+    'silence.preview.clean': '✅ 무음 제거된 오디오 미리보기',
+    'silence.legend.red': '■ <span style="color:rgba(232,71,71,.6)">빨간 구간</span> = 무음',
+    'silence.legend.blue': '■ <span style="color:var(--blue)">파란 선</span> = 현재 위치',
+    'silence.video.notice': '📹 <strong style="color:var(--blue)">영상 무음삭제</strong>는 로컬에서 진행해주세요. <a href="http://localhost:5000" target="_blank" style="color:var(--blue);margin-left:4px">localhost:5000 →</a>',
+    'install.step3.title': 'setup 파일 실행', 'install.step3.desc': '압축 해제 후 실행하면 ffmpeg, Whisper, Flask가 자동 설치됩니다.',
+    'install.step4.title': '매번 사용할 때마다', 'install.step4.desc': '컴퓨터를 껐다 켜면 서버가 종료돼요.<br>다시 사용할 때는 <strong style="color:var(--gold)">start.bat</strong>을 실행하세요.<br>(setup.bat은 최초 1회만)',
+    'install.step5.title': 'setup vs start 차이', 'install.step5.desc': '<strong style="color:var(--gold)">setup</strong> — 최초 1회만. 패키지·ffmpeg 자동 설치.<br><strong style="color:var(--green)">start</strong> — 매번 사용 시. 설치 없이 서버만 즉시 시작.',
+    'dl.title': '지금 시작하세요',
+    'dl.sub': '완전 무료 · 데이터 외부 전송 없음 · 오프라인 작동',
+    'dl.win': '⬇ Windows 다운로드',
+    'dl.mac': '⬇ Mac / Linux',
+    'dl.note': 'Python 3.8 이상 필요 · Windows 10+ · macOS 11+',
+    'bmc': '☕ 이 도구가 도움이 됐다면 커피 한 잔 사주세요',
+    'bmc.header': '이 도구가 도움이 됐다면 커피 한 잔 사주세요',
+    'contact': '오류나 버그 발생 시 연락해주세요 →',
+    'footer.brand': '무료 무제한 자동자막 생성기 © 2025',
+    'footer.github': 'GitHub',
+    'footer.install': '설치 가이드',
+    'footer.app': '앱 사용',
+    'file.open': '📂 파일 열기',
+    'copy.done': '✅ 복사됨!',
+    'cmp.feature': '기능',
+    'cmp.ourname': '무료 무제한 자동자막 생성기',
+    'cmp.row1': '자동 자막 생성',
+    'cmp.row2': '원문 스크립트 싱크',
+    'cmp.row3': '무음 제거 + 자막 싱크',
+    'cmp.row4': '완전 무료',
+    'fmt.srt': '.srt (일반)',
+    'fmt.vtt': '.vtt (WebVTT / YouTube)',
+    'fmt.ass': '.ass (고급 스타일)',
+    'fmt.sbv': '.sbv (YouTube)',
+    'fmt.txt': '.txt (텍스트만)',
+  },
+  en: {
+    'nav.app': 'Use App',
+    'nav.install': 'Install Guide',
+    'nav.download': 'Download',
+    'notice.text': '💡 <strong>Voice transcription</strong> and <strong>video silence removal</strong> require local installation at <a href="http://localhost:5000" target="_blank">localhost:5000</a>. <strong>Sync merge · Script→Subtitle · Silence removal</strong> are available here without installation. <a href="javascript:void(0)" onclick="document.getElementById(\'install\').scrollIntoView({behavior:\'smooth\'})">Install Guide →</a>',
+    'tab.txt2srt': '📝 Script → Original Subtitle',
+    'tab.retime': '🔧 Sync Merge',
+    'tab.silence': '✂️ Silence Remove',
+    'txt2srt.card1': 'Enter Script Text',
+    'txt2srt.placeholder': 'Enter your script. You can also split lines with Enter.',
+    'txt2srt.maxchars': 'Max characters per line (for auto-split)',
+    'txt2srt.duration': 'Total video length (sec, for timestamps)',
+    'txt2srt.outfmt': 'Output subtitle format',
+    'txt2srt.editcard': 'Edit lines — Enter to split · + add · × delete',
+    'txt2srt.addtop': '+ Top',
+    'txt2srt.reset': '↩ Re-enter',
+    'txt2srt.build': '📝 Generate Subtitle',
+    'txt2srt.btn': '📝 Auto-split & Edit',
+    'txt2srt.count': 'Count',
+    'txt2srt.dur': 'Duration',
+    'txt2srt.copy': '📋 Copy',
+    'txt2srt.dl': '⬇ Download Subtitle',
+    'retime.whisper.title': 'WHISPER SUBTITLE (Timing ✓, Typos ✗)',
+    'retime.whisper.label': 'WHISPER.SRT',
+    'retime.whisper.ph': 'Paste Whisper SRT or drag/click to open',
+    'retime.original.title': 'ORIGINAL SUBTITLE (Text ✓, Timing ✗)',
+    'retime.original.label': 'ORIGINAL.SRT',
+    'retime.original.ph': 'Paste original SRT or drag/click to open',
+    'retime.outfmt': 'Output format',
+    'retime.btn': '🔧 Redistribute Timing',
+    'retime.w': 'Whisper',
+    'retime.o': 'Original',
+    'retime.c': 'Result',
+    'retime.copy': '📋 Copy',
+    'retime.dl': '⬇ Download SRT',
+    'silence.upload.title': 'Drag or click to upload Audio + Subtitle files',
+    'silence.upload.sub': 'Audio: MP3, WAV, M4A · Subtitle: .srt .vtt .ass .sbv (optional)',
+    'silence.settings.title': 'Silence Detection Settings',
+    'silence.threshold': 'Detection threshold (higher = more detected)',
+    'silence.mindur': 'Minimum silence duration (sec)',
+    'silence.detect': '🔍 Detect Silence',
+    'silence.srt.title': 'Input Subtitle',
+    'silence.preview.btn': '▶ Preview After Silence Removal',
+    'silence.export.btn': '⬇ Download Audio + Subtitle',
+    'silence.removed': 'Removed',
+    'silence.adj': 'Subtitle adjusted',
+    'silence.video.notice': '📹 <strong>Video silence removal</strong> is available locally. <a href="http://localhost:5000" target="_blank">localhost:5000 →</a>',
+    'workflow.title': 'Shorts / Video Production Workflow',
+    'workflow.subtitle': 'Choose a path based on your media type',
+    'workflow.badge.local.desc': '= Your PC (localhost:5000)',
+    'workflow.badge.web.desc': '= This page',
+    'workflow.tab.audio': 'Audio + Subtitle',
+    'workflow.tab.video': 'Video + Subtitle',
+    'workflow.step1.title': 'Extract Audio &<br>Generate Subtitle',
+    'workflow.step1.desc': 'Transcribe audio securely on your PC using Whisper AI.',
+    'workflow.step2.title': 'Optimize Script &<br>Sync Merge',
+    'workflow.step2.desc': 'Generate original subtitles and match them with Whisper timing for precise sync.',
+    'workflow.step3.title': 'Auto Cut<br>Silent Sections',
+    'workflow.step3.desc': 'Detect and remove silent gaps based on the synced subtitle.',
+    'workflow.step2.btn': 'Sync Merge →',
+    'workflow.step3.btn': 'Silence Remove →',
+    'workflow.v.step1.title': 'Extract Audio &<br>Generate Subtitle',
+    'workflow.v.step1.desc': 'Transcribe audio from your video using Whisper AI on your local PC.',
+    'workflow.v.step2.title': 'Optimize Script &<br>Sync Merge',
+    'workflow.v.step2.desc': 'Generate original subtitles and match them with Whisper timing.',
+    'workflow.v.step3.title': 'Video Silence Remove<br><span style="font-size:11px;font-weight:400;color:var(--gray)">(Back to Local)</span>',
+    'workflow.v.step3.desc': 'Video files must be processed locally. Add your synced subtitle to auto-adjust timestamps too.',
+    'workflow.v.step3.btn': 'Video Silence Remove →',
+    'workflow.v.step4.title': 'Fine-tune Subtitle<br><span style="font-size:11px;font-weight:400;color:var(--gray)">(Optional)</span>',
+    'workflow.v.step4.desc': 'Further edit or convert the adjusted subtitle here on the web.',
+    'workflow.v.step4.btn': 'Script Editor →',
+    'hero.eyebrow': 'Free · Local AI · No API Key · Multi-Format',
+    'hero.title': 'All-in-One<span>Auto Subtitle Generator</span>',
+    'hero.sub': 'Whisper AI transcribes audio and automatically syncs with your original script.',
+    'hero.use': '⬆ Use App Now',
+    'hero.dl': '⬇ Download',
+    'feat.title': 'Key Features',
+    'feat1.title': 'Whisper AI Transcription', 'feat1.desc': 'Transcribe audio locally with Whisper AI. No API key needed.',
+    'feat2.title': 'Script → Original Subtitle', 'feat2.desc': 'Auto-split scripts into subtitle format with timestamp calculation.',
+    'feat3.title': 'Script Sync Merge', 'feat3.desc': 'Auto-map Whisper timing + original subtitles. Accurate, typo-free.',
+    'feat4.title': 'Silence Removal', 'feat4.desc': 'Detect and remove silence. Audio/video and subtitles adjusted together.',
+    'feat5.title': 'Multi-Format Subtitles', 'feat5.desc': 'SRT, VTT, ASS, SBV and more. Compatible with all editors.',
+    'feat6.title': 'Completely Free', 'feat6.desc': 'No subscription. No data sent externally. No API key required.',
+    'compare.title': 'Why <em>All-in-One Auto Subtitle Generator</em>?',
+    'install.title': 'Installation Guide (Voice Transcription)',
+    'install.step1.title': 'Install Python', 'install.step1.desc': 'Check <strong style="color:var(--gold)">"Add Python to PATH"</strong> during installation!',
+    'install.step2.title': 'Download App', 'install.step2.desc': 'Download the file for your OS from the download button below.',
+    'install.step2.link': '→ Go to Download section',
+    'install.win.setup': 'Windows: double-click setup.bat',
+    'install.mac.setup': 'Mac/Linux: bash setup.sh',
+    'install.win.start': 'Windows: double-click start.bat',
+    'install.mac.start': 'Mac/Linux: bash start.sh',
+    'install.localhost': '→ Open localhost:5000 after running',
+    'install.first': 'First install: setup.bat',
+    'install.daily': 'Daily use: start.bat',
+    'txt2srt.card1': 'Enter Script Text',
+    'txt2srt.placeholder': 'Enter your script. You can also split lines with Enter.',
+    'txt2srt.maxchars': 'Max characters per line (for auto-split)',
+    'txt2srt.duration': 'Total video length (sec, for timestamps)',
+    'txt2srt.duration.ph': 'e.g. 63',
+    'retime.whisper.title': 'Whisper SRT (Timing ✓, Typos ✗)',
+    'retime.whisper.label': 'WHISPER SRT',
+    'retime.whisper.ph': 'Paste Whisper SRT or drag / click to open',
+    'retime.original.title': 'Original SRT (Text ✓, Timing ✗)',
+    'retime.original.label': 'ORIGINAL SRT',
+    'retime.original.ph': 'Paste Original SRT or drag / click to open',
+    'retime.outfmt': 'Output format:',
+    'silence.upload.title': 'Upload Audio + SRT together (drag supported)',
+    'silence.upload.dztitle': 'Drag audio + subtitle files here or click to select',
+    'silence.upload.sub': 'Audio: MP3, WAV, M4A etc · Subtitle: .srt .vtt .ass .sbv (optional)',
+    'silence.settings.title': 'Silence Detection Settings',
+    'silence.threshold': 'Detection threshold (higher = more detected)',
+    'silence.mindur': 'Minimum silence duration (sec)',
+    'silence.outfmt': 'Output subtitle format:',
+    'silence.play': '▶ Play',
+    'silence.preview.orig': 'Original Audio Preview (red zones = silence)',
+    'silence.preview.clean': '✅ Silence-Removed Audio Preview',
+    'silence.legend.red': '■ <span style="color:rgba(232,71,71,.6)">Red zones</span> = silence',
+    'silence.legend.blue': '■ <span style="color:var(--blue)">Blue line</span> = current position',
+    'silence.video.notice': '📹 <strong style="color:var(--blue)">Video silence removal</strong> requires local app. <a href="http://localhost:5000" target="_blank" style="color:var(--blue);margin-left:4px">localhost:5000 →</a>',
+    'install.step3.title': 'Run setup file', 'install.step3.desc': 'Unzip and run — ffmpeg, Whisper, Flask are auto-installed.',
+    'install.step4.title': 'Every time you use it', 'install.step4.desc': 'Server stops when you shut down your PC.<br>Run <strong style="color:var(--gold)">start.bat</strong> each time.<br>(setup.bat is only for first-time setup)',
+    'install.step5.title': 'setup vs start', 'install.step5.desc': '<strong style="color:var(--gold)">setup</strong> — First time only. Auto-installs packages & ffmpeg.<br><strong style="color:var(--green)">start</strong> — Every use. Starts server instantly.',
+    'dl.title': 'Get Started Now',
+    'dl.sub': 'Completely Free · No Data Sent · Works Offline',
+    'dl.win': '⬇ Windows Download',
+    'dl.mac': '⬇ Mac / Linux',
+    'dl.note': 'Requires Python 3.8+ · Windows 10+ · macOS 11+',
+    'bmc': '☕ If this tool helped you, buy me a coffee',
+    'bmc.header': 'If this tool helped you, buy me a coffee',
+    'contact': 'Report bugs or errors →',
+    'footer.brand': 'All-in-One Auto Subtitle Generator © 2025',
+    'footer.github': 'GitHub',
+    'footer.install': 'Install Guide',
+    'footer.app': 'Use App',
+    'file.open': '📂 Open File',
+    'copy.done': '✅ Copied!',
+    'cmp.feature': 'Feature',
+    'cmp.ourname': 'All-in-One Auto Subtitle Generator',
+    'cmp.row1': 'Auto Subtitle Generation',
+    'cmp.row2': 'Script Sync Merge',
+    'cmp.row3': 'Silence Removal + Subtitle Sync',
+    'cmp.row4': 'Completely Free',
+    'fmt.srt': '.srt (standard)',
+    'fmt.vtt': '.vtt (WebVTT / YouTube)',
+    'fmt.ass': '.ass (advanced style)',
+    'fmt.sbv': '.sbv (YouTube)',
+    'fmt.txt': '.txt (text only)',
+  },
+  ja: {
+    'nav.app': 'アプリ使用',
+    'nav.install': 'インストール',
+    'nav.download': 'ダウンロード',
+    'notice.text': '💡 <strong>音声文字起こし</strong>と<strong>動画無음除去</strong>はローカルインストール後、<a href="http://localhost:5000" target="_blank">localhost:5000</a>でご利用ください。このページでは<strong>シンク結合・スクリプト→字幕生成・無音削除</strong>をインストールなしで利用できます。<a href="javascript:void(0)" onclick="document.getElementById(\'install\').scrollIntoView({behavior:\'smooth\'})">インストールガイド →</a>',
+    'tab.txt2srt': '📝 スクリプト → 字幕生成',
+    'tab.retime': '🔧 シンク結合',
+    'tab.silence': '✂️ 無音削除',
+    'txt2srt.card1': '原文テキスト入力',
+    'txt2srt.placeholder': '原文テキストを入力してください。Enterキーで行を分割できます。',
+    'txt2srt.maxchars': '最大文字数（自動分割時に適用）',
+    'txt2srt.duration': '動画の総時間（秒、タイムスタンプ計算用）',
+    'txt2srt.outfmt': '出力字幕形式',
+    'txt2srt.editcard': '字幕行編集 — Enterで分割 · +追加 · ×削除',
+    'txt2srt.addtop': '+ 先頭追加',
+    'txt2srt.reset': '↩ 再入力',
+    'txt2srt.build': '📝 字幕生成',
+    'txt2srt.btn': '📝 自動分割して編集',
+    'txt2srt.count': '字幕数',
+    'txt2srt.dur': '合計時間',
+    'txt2srt.copy': '📋 コピー',
+    'txt2srt.dl': '⬇ 字幕ダウンロード',
+    'retime.whisper.title': 'WHISPER字幕（タイミング○、誤字×）',
+    'retime.whisper.label': 'WHISPER.SRT',
+    'retime.whisper.ph': 'Whisper SRTを貼り付けるか、ファイルをドラッグして開いてください',
+    'retime.original.title': '原文字幕（テキスト○、タイミング×）',
+    'retime.original.label': 'ORIGINAL.SRT',
+    'retime.original.ph': '原文SRTを貼り付けるか、ファイルをドラッグして開いてください',
+    'retime.outfmt': '出力形式',
+    'retime.btn': '🔧 タイミング再配分',
+    'retime.w': 'Whisper',
+    'retime.o': '原文',
+    'retime.c': '結果',
+    'retime.copy': '📋 コピー',
+    'retime.dl': '⬇ SRTダウンロード',
+    'silence.upload.title': 'オーディオ＋字幕ファイルをドラッグまたはクリックして選択',
+    'silence.upload.sub': 'オーディオ: MP3, WAV, M4A · 字幕: .srt .vtt .ass .sbv（任意）',
+    'silence.settings.title': '無音検出設定',
+    'silence.threshold': '検出しきい値（高いほど多く検出）',
+    'silence.mindur': '最小無音時間（秒）',
+    'silence.detect': '🔍 無音区間を検出',
+    'silence.srt.title': '入力字幕',
+    'silence.preview.btn': '▶ 無音除去後プレビュー',
+    'silence.export.btn': '⬇ オーディオ＋字幕ダウンロード',
+    'silence.removed': '除去された無音',
+    'silence.adj': '字幕調整',
+    'silence.video.notice': '📹 <strong>動画의 무음 삭제</strong>는 로컬에서 진행해 주세요. <a href="http://localhost:5000" target="_blank">localhost:5000 →</a>',
+    'workflow.title': 'ショート動画制作ワークフロー',
+    'workflow.subtitle': 'メディアの種類に合わせてパスを選択してください',
+    'workflow.badge.local.desc': '= PC（localhost:5000）',
+    'workflow.badge.web.desc': '= This page',
+    'workflow.tab.audio': '音声 + 字幕',
+    'workflow.tab.video': '動画 + 字幕',
+    'workflow.step1.title': '音声抽出と<br>字幕生成',
+    'workflow.step1.desc': 'PC上でWhisper AIを使い、音声を字幕ファイルに変換します。',
+    'workflow.step2.title': '原稿最適化と<br>シンク結合',
+    'workflow.step2.desc': '原文字幕を生成し、Whisper字幕と自動マッチングして正確なシンクを完成させます。',
+    'workflow.step3.title': '無음区間の<br>自動カット編集',
+    'workflow.step3.desc': '完成した字幕を基準に無음区間を検出し、一括で削除します。',
+    'workflow.step2.btn': 'シンク結合 →',
+    'workflow.step3.btn': '無音削除 →',
+    'workflow.v.step1.title': '音声抽出と<br>字幕生成',
+    'workflow.v.step1.desc': 'Whisper AIで動画から音声を抽出し字幕を生成します。',
+    'workflow.v.step2.title': '原稿最適化と<br>シン크結合',
+    'workflow.v.step2.desc': '原文字幕を生成し、Whisper字幕とマッチングしてシンクを完成させます。',
+    'workflow.v.step3.title': '動画無음削除<br><span style="font-size:11px;font-weight:400;color:var(--gray)">（ローカルに戻る）</span>',
+    'workflow.v.step3.desc': '動画ファイルはローカルで処理します。シンク済み字幕を入れるとタイムスタンプ도 자동 조정됩니다.',
+    'workflow.v.step3.btn': '動画無음削除 →',
+    'workflow.v.step4.title': '字幕微調整<br><span style="font-size:11px;font-weight:400;color:var(--gray)">（任意）</span>',
+    'workflow.v.step4.desc': '調整済み字幕をWebでさらに編集したり形式変換できます。',
+    'workflow.v.step4.btn': 'スクリプト編集 →',
+    'hero.eyebrow': '無料 · ローカルAI · APIキー不要 · マルチフォーマット',
+    'hero.title': 'オールインワン<span>自動字幕生成ツール</span>',
+    'hero.sub': 'Whisper AIが音声を文字起こしし、原稿と自動的にシンクします。',
+    'hero.use': '⬆ アプリを使う',
+    'hero.dl': '⬇ ダウンロード',
+    'feat.title': '主な機能',
+    'feat1.title': 'Whisper AI 自動文字起こし', 'feat1.desc': 'ローカルWhisper AIで音声を文字起こし。APIキー不要。',
+    'feat2.title': 'スク리프트 → 字幕生成', 'feat2.desc': 'スクリプトを字幕形式に自動分割。文字数基準でタイムスタンプを自動付与。',
+    'feat3.title': 'スクリプトシンク結合', 'feat3.desc': 'Whisperタイミング＋原文字幕를 자동 마ッ핑. 正確で誤字のない字幕。',
+    'feat4.title': '無音区間除去', 'feat4.desc': '息継ぎ・無音を検出して除去。オーディオと字幕が同時に調整されます。',
+    'feat5.title': '多様な字幕形式', 'feat5.desc': 'SRT, VTT, ASS, SBVなど全編集ソフト対応形式をサポート。',
+    'feat6.title': '完全無料', 'feat6.desc': 'サブスクなし。データ外部送信なし。APIキー不要。',
+    'compare.title': 'なぜ<em>オールインワン自動字幕生成ツール</em>なのか？',
+    'install.title': 'インストール方法（音声文字起こし機能）',
+    'install.step1.title': 'Pythonをインストール', 'install.step1.desc': 'インストール時に<strong style="color:var(--gold)">"Add Python to PATH"</strong>を必ずチェック！',
+    'install.step2.title': 'アプリをダウンロード', 'install.step2.desc': '下のダウンロードボタンからOSに合ったファイルを取得してください。',
+    'install.step2.link': '→ ダウンロードセクションへ',
+    'install.step3.title': 'setupファイルを実行', 'install.step3.desc': '解凍後に実行するとffmpeg、Whisper、Flaskが自動インストールされます。',
+    'install.step4.title': '毎回使用する前に', 'install.step4.desc': 'PCをシャットダウンするとサーバーが停止します。<br>再度使用する際は<strong style="color:var(--gold)">start.bat</strong>を実行してください。<br>（setup.batは初回のみ）',
+    'install.step5.title': 'setupとstartの違い', 'install.step5.desc': '<strong style="color:var(--gold)">setup</strong> — 初回のみ。パッケージ＆ffmpegを自動インストール。<br><strong style="color:var(--green)">start</strong> — 毎回使用時。インストールなしで即サーバー起動。',
+    'dl.title': '今すぐ始めましょう',
+    'dl.sub': '完全無料 · 데이터 외부 전송 없음 · 오프라인 작동',
+    'dl.win': '⬇ Windowsダウンロード',
+    'dl.mac': '⬇ Mac / Linux',
+    'dl.note': 'Python 3.8以上が必要 · Windows 10+ · macOS 11+',
+    'bmc': '☕ このツールが役に立ったら、コーヒー一杯おごってください',
+    'bmc.header': 'このツールが役に立ったら、コーヒーをおごってください',
+    'contact': 'バグや不具合はこちらへ →',
+    'footer.brand': 'オールインワン自動字幕生成ツール © 2025',
+    'footer.github': 'GitHub',
+    'footer.install': 'インストールガイド',
+    'footer.app': 'アプリ使用',
+    'file.open': '📂 ファイルを開く',
+    'copy.done': '✅ コピー完了！',
+    'cmp.feature': '機能',
+    'cmp.ourname': 'オールインワン自動字幕生成ツール',
+    'cmp.row1': '自動字幕生成',
+    'cmp.row2': 'スクリプトシンク結合',
+    'cmp.row3': '無音除去＋字幕シンク',
+    'cmp.row4': '完全無料',
+    'fmt.srt': '.srt（標準）',
+    'fmt.vtt': '.vtt（WebVTT / YouTube）',
+    'fmt.ass': '.ass（高度なスタイル）',
+    'fmt.sbv': '.sbv（YouTube）',
+    'fmt.txt': '.txt（テキストのみ）',
+    'install.win.setup': 'Windows: setup.bat をダブルクリック',
+    'install.mac.setup': 'Mac/Linux: bash setup.sh',
+    'install.win.start': 'Windows: start.bat をダブルクリック',
+    'install.mac.start': 'Mac/Linux: bash start.sh',
+    'install.localhost': '→ 起動後 localhost:5000 にアクセス',
+    'install.first': '初回インストール: setup.bat',
+    'install.daily': '毎回使用: start.bat',
+    'txt2srt.card1': '原文テキスト入力',
+    'txt2srt.placeholder': '原文テキストを入力してください。Enterキーで行を分割できます。',
+    'txt2srt.maxchars': '最大文字数（自動分割時に適用）',
+    'txt2srt.duration': '動画の総時間（秒、タイムスタンプ計算用）',
+    'txt2srt.duration.ph': '例: 63',
+    'retime.whisper.title': 'Whisper字幕（タイミング○、誤字×）',
+    'retime.whisper.label': 'WHISPER字幕',
+    'retime.whisper.ph': 'Whisper SRTを貼り付けるか、ファイルをドラッグして開いてください',
+    'retime.original.title': '原文字幕（テキスト○、タイミング×）',
+    'retime.original.label': '原文字幕',
+    'retime.original.ph': '原文SRTを貼り付けるか、ファイルをドラッグして開いてください',
+    'retime.outfmt': '出力形式:',
+    'silence.upload.title': 'オーディオ＋字幕ファイルを同時添付（ドラッグ可）',
+    'silence.upload.dztitle': 'オーディオと字幕ファイルをまとめてドラッグ、またはクリックして選択',
+    'silence.upload.sub': 'オーディオ: MP3, WAV, M4A等 · 字막: .srt .vtt .ass .sbv（任意）',
+    'silence.settings.title': '無音検出設定',
+    'silence.threshold': '検出しきい値（高いほど多く検出）',
+    'silence.mindur': '最小無音時間（秒）',
+    'silence.outfmt': '出力字幕形式:',
+    'silence.play': '▶ 再生',
+    'silence.preview.orig': '元音声プレビュー（赤区간 = 無音）',
+    'silence.preview.clean': '✅ 無音除去済み音声プレビュー',
+    'silence.legend.red': '■ <span style="color:rgba(232,71,71,.6)">赤区間</span> = 無音',
+    'silence.legend.blue': '■ <span style="color:var(--blue)">青線</span> = 현재 위치',
+    'silence.video.notice': '📹 <strong style="color:var(--blue)">영상 무음삭제</strong>는 로컬에서 진행해주세요. <a href="http://localhost:5000" target="_blank" style="color:var(--blue);margin-left:4px">localhost:5000 →</a>',
+  }
+};
+
+let currentLang = localStorage.getItem('wavesrt-lang') || 'ko';
+
+function t(key) {
+  return I18N[currentLang]?.[key] || I18N['ko']?.[key] || key;
+}
+
+function applyLang(lang) {
+  currentLang = lang;
+  localStorage.setItem('wavesrt-lang', lang);
+
+  document.querySelectorAll('.lang-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.lang === lang);
+  });
+
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.dataset.i18n;
+    const val = t(key);
+    if (el.tagName === 'INPUT' && el.type !== 'button') {
+      el.placeholder = val;
+    } else if (el.tagName === 'TEXTAREA') {
+      el.placeholder = val;
+    } else {
+      el.innerHTML = val;
+    }
+  });
+
+  document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+    el.placeholder = t(el.dataset.i18nPh);
+  });
+
+  document.querySelectorAll('[data-i18n-opt]').forEach(el => {
+    const val = t(el.dataset.i18nOpt);
+    if (val && val !== el.dataset.i18nOpt) el.textContent = val;
+  });
+}
 </script>
 </body>
 </html>
