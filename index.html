@@ -1624,6 +1624,8 @@ async function exportSilence() {
 
 function downloadCleanAudio() {
   if (!cleanAudioBuffer) return;
+  // 오디오 다운로드 시에도 광고 링크 오픈 추가
+  window.open("https://omg10.com/4/11035245", "_blank");
   const numCh=cleanAudioBuffer.numberOfChannels,len=cleanAudioBuffer.length*numCh*2+44;
   const buf=new ArrayBuffer(len),view=new DataView(buf);
   let pos=0;
