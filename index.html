@@ -769,6 +769,16 @@ let _cleanCtx = null, _cleanSource = null;
 let _cleanOffset = 0, _cleanStartTime = 0, _cleanPlaying = false, _cleanAnimFrame = null;
 let silenceSrtText = '';
 
+// 원본 오디오 미리보기 전역변수
+let _previewCtx = null;
+let _previewSource = null;
+let _previewBuffer = null;
+let _previewOffset = 0;
+let _previewStartTime = 0;
+let _previewPlaying = false;
+let _animFrame = null;
+let parsedSubtitles = [];
+
 function switchTab(name) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
@@ -851,10 +861,9 @@ async function handleSilenceFiles(files) {
   document.getElementById('silenceExportBtn').style.display = 'none';
   document.getElementById('silenceRemoveBtn').style.display = 'none';
 
-  if (!window._previewCtx || window._previewCtx.state === 'closed') {
-    window._previewCtx = new (window.AudioContext || window.webkitAudioContext)();
-  }
-
+if (!_previewCtx || _previewCtx.state === 'closed') {
+    _previewCtx = new (window.AudioContext || window.webkitAudioContext)();
+}
   for (const file of files) {
     const chip = document.createElement('div');
     chip.className = 'file-chip';
@@ -870,7 +879,7 @@ async function handleSilenceFiles(files) {
       reader.readAsText(file, 'utf-8');
       chip.textContent = '📄 ' + file.name;
     } else {
-      silenceAudioBuffer = await window._previewCtx.decodeAudioData(await file.arrayBuffer());
+      silenceAudioBuffer = await _previewCtx.decodeAudioData(await file.arrayBuffer());
       chip.textContent = '🎧 ' + file.name;
     }
     chips.appendChild(chip);
@@ -1451,9 +1460,9 @@ function initPreviewPlayer(buffer, subtitleText, titleText) {
   _previewBuffer = buffer;
   window._cleanPlayBuffer = null;
   parsedSubtitles = parseSrtForPreview(subtitleText);
-  if (!window._previewCtx || window._previewCtx.state === 'closed') {
-    window._previewCtx = new (window.AudioContext || window.webkitAudioContext)();
-  }
+  if (!_previewCtx || _previewCtx.state === 'closed') {
+    _previewCtx = new (window.AudioContext || window.webkitAudioContext)();
+}
 
   const card = document.getElementById('silencePreviewCard');
   const titleEl = card.querySelector('.card-title span');
@@ -1691,6 +1700,32 @@ async function exportSilence() {
     errEl.textContent = '⚠ 먼저 무음 제거 후 미리보기를 실행해주세요';
     errEl.style.display = 'block'; return;
   }
+
+function downloadCleanAudio() {
+  if (!cleanAudioBuffer) { alert('무음 제거 결과를 먼저 빌드해주세요.'); return; }
+  const numCh = cleanAudioBuffer.numberOfChannels, len = cleanAudioBuffer.length * numCh * 2 + 44;
+  const buf = new ArrayBuffer(len), view = new DataView(buf);
+  let pos = 0;
+  const su32 = v => { view.setUint32(pos, v, true); pos += 4; };
+  const su16 = v => { view.setUint16(pos, v, true); pos += 2; };
+  su32(0x46464952); su32(len - 8); su32(0x45564157); su32(0x20746d66); su32(16); su16(1); su16(numCh);
+  su32(cleanAudioBuffer.sampleRate); su32(cleanAudioBuffer.sampleRate * 2 * numCh);
+  su16(numCh * 2); su16(16); su32(0x61746164); su32(len - pos - 4);
+  const channels = [];
+  for (let i = 0; i < numCh; i++) channels.push(cleanAudioBuffer.getChannelData(i));
+  let offset = 0;
+  while (pos < len) {
+    for (let i = 0; i < numCh; i++) {
+      let s = Math.max(-1, Math.min(1, channels[i][offset]));
+      s = (0.5 + s < 0 ? s * 32768 : s * 32767) | 0;
+      view.setInt16(pos, s, true); pos += 2;
+    }
+    offset++;
+  }
+  const blob = new Blob([buf], { type: 'audio/wav' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'clean_audio.wav'; a.click();
+  URL.revokeObjectURL(a.href);
+}
 
   btn.disabled = true;
   btn.innerHTML = '⏳ 처리 중...';
