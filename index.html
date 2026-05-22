@@ -739,6 +739,28 @@ function handleDownloadAd(event, downloadUrl) {
   a.click();
 }
 
+// ── [교체/추가] 무음 감지 및 미리보기 연동을 위한 자막 파싱 엔진 ──
+function parseSrtForPreview(srt) {
+  if (!srt) return [];
+  // 줄바꿈 포맷 통일 후 단락 단위 분리
+  const blocks = srt.replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim().split(/\n\s*\n/);
+  return blocks.map(b => {
+    const lines = b.trim().split('\n');
+    if (lines.length < 3) return null;
+    
+    // 일반 SRT(, 사용) 및 WebVTT(. 사용) 규격 타임스탬프 모두 추출
+    const m = lines[1].match(/(\d{2}):(\d{2}):(\d{2})[,\.](\d{3})\s*-->\s*(\d{2}):(\d{2}):(\d{2})[,\.](\d{3})/);
+    if (!m) return null;
+    
+    const toSec = (h, mn, s, ms) => +h * 3600 + +mn * 60 + +s + +ms / 1000;
+    return {
+      start: toSec(m[1], m[2], m[3], m[4]),
+      end: toSec(m[5], m[6], m[7], m[8]),
+      text: lines.slice(2).join('<br>') // 개행 처리를 위해 br 태그로 변환
+    };
+  }).filter(Boolean);
+}
+
 const RENDER_URL = 'https://9mcwy3i0wx.onrender.com';
 const state = { retime:'', txt2srt:'', silence:'' };
 let silenceAudioBuffer = null, detectedSilences = [], cleanAudioBuffer = null;
