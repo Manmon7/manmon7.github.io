@@ -318,9 +318,9 @@ footer{padding:36px 24px;border-top:1px solid var(--line);display:flex;justify-c
         <div class="srt-code" id="retimeSrtPreview"></div>
       </div>
       <div class="btn-row">
-        <button class="btn btn-ghost" onclick="copyResult('retime')">📋 복사</button>
-        <button class="btn btn-accent" onclick="downloadResult('retime')">⬇ SRT 다운로드</button>
-      </div>
+  <button class="btn btn-ghost" onclick="downloadResult('silenceAudio')">⬇ 무음 제거 오디오 다운로드</button>
+  <button class="btn btn-accent" id="silenceSrtDlBtn" onclick="downloadResult('silence')" style="display:inline-flex;">⬇ 싱크조정 자막 다운로드</button>
+</div>
     </div>
   </div>
 
@@ -904,6 +904,34 @@ async function copyResult(key) {
 
 function downloadResult(key) {
   triggerAdPopup(); 
+
+  // ── [신설] 웹 무음 제거 오디오 디스크 저장 처리 블록 ──
+  if (key === 'silenceAudio') {
+    if (!cleanAudioBuffer) { alert('무음 제거 결과를 먼저 빌드해주세요.'); return; }
+    const numCh = cleanAudioBuffer.numberOfChannels, len = cleanAudioBuffer.length * numCh * 2 + 44;
+    const buf = new ArrayBuffer(len), view = new DataView(buf);
+    let pos = 0;
+    const su32 = v => { view.setUint32(pos, v, true); pos += 4; };
+    const su16 = v => { view.setUint16(pos, v, true); pos += 2; };
+    su32(0x46464952); su32(len - 8); su32(0x45564157); su32(0x20746d66); su32(16); su16(1); su16(numCh);
+    su32(cleanAudioBuffer.sampleRate); su32(cleanAudioBuffer.sampleRate * 2 * numCh);
+    su16(numCh * 2); su16(16); su32(0x61746164); su32(len - pos - 4);
+    const channels = [];
+    for (let i = 0; i < numCh; i++) channels.push(cleanAudioBuffer.getChannelData(i));
+    let offset = 0;
+    while (pos < len) {
+      for (let i = 0; i < numCh; i++) {
+        let s = Math.max(-1, Math.min(1, channels[i][offset]));
+        s = (0.5 + s < 0 ? s * 32768 : s * 32767) | 0;
+        view.setInt16(pos, s, true); pos += 2;
+      }
+      offset++;
+    }
+    const blob = new Blob([buf], { type: 'audio/wav' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'clean_audio.wav'; a.click();
+    return;
+  }
+
   const names = { retime:'final', txt2srt:'original', silence:'adjusted' };
   if (key === 'silence' && !state.silence && silenceSrtText) {
     state.silence = adjustSubtitleLocally(silenceSrtText, detectedSilences);
@@ -1288,6 +1316,62 @@ function seekCanvas(e) {
     updateSubtitleDisplay(seekTime);
     document.getElementById('previewTime').textContent = formatPreviewTime(seekTime);
   }
+}
+
+// ── [핵심 교체] 전역 윈도우 오디오 컨텍스트 맵핑 및 가상 스레드 제어 복원 ──
+function startPreview() {
+  if (!_previewBuffer || !window._previewCtx) return;
+  const playFn = () => {
+    if (_previewSource) {
+      try{_previewSource.stop();}catch(e){}
+      try{_previewSource.disconnect();}catch(e){}
+      _previewSource = null;
+    }
+    _previewSource = window._previewCtx.createBufferSource();
+    _previewSource.buffer = _previewBuffer;
+    _previewSource.connect(window._previewCtx.destination);
+    _previewStartTime = window._previewCtx.currentTime - Math.max(0, _previewOffset);
+    _previewSource.start(0, Math.max(0, _previewOffset));
+    _previewPlaying = true;
+    document.getElementById('previewPlayBtn').textContent = '⏸ 일시정지';
+
+    _previewSource.onended = () => {
+      if (_previewPlaying) {
+        _previewPlaying = false; _previewOffset = 0;
+        cancelAnimationFrame(_animFrame);
+        document.getElementById('previewPlayBtn').textContent = '▶ 재생';
+        document.getElementById('previewTime').textContent = '00:00.00';
+        drawWaveform(_previewBuffer, detectedSilences, 0);
+      }
+    };
+    const loop = () => {
+      if (!_previewPlaying) return;
+      const t = window._previewCtx.currentTime - _previewStartTime;
+      _previewOffset = t;
+      drawWaveform(_previewBuffer, detectedSilences, t);
+      updateSubtitleDisplay(t);
+      document.getElementById('previewTime').textContent = formatPreviewTime(t);
+      _animFrame = requestAnimationFrame(loop);
+    };
+    _animFrame = requestAnimationFrame(loop);
+  };
+
+  if (window._previewCtx.state === 'suspended') {
+    window._previewCtx.resume().then(playFn);
+  } else {
+    playFn();
+  }
+}
+
+function stopPreview() {
+  _previewPlaying = false;
+  cancelAnimationFrame(_animFrame);
+  if (_previewSource) {
+    try{_previewSource.stop();}catch(e){}
+    try{_previewSource.disconnect();}catch(e){}
+    _previewSource = null;
+  }
+  document.getElementById('previewPlayBtn').textContent = '▶ 재생';
 }
 
 function updateSubtitleDisplay(t) {
