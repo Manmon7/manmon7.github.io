@@ -1327,61 +1327,7 @@ function seekCanvas(e) {
   }
 }
 
-// ── [핵심 교체] 전역 윈도우 오디오 컨텍스트 맵핑 및 가상 스레드 제어 복원 ──
-function startPreview() {
-  if (!_previewBuffer || !window._previewCtx) return;
-  const playFn = () => {
-    if (_previewSource) {
-      try{_previewSource.stop();}catch(e){}
-      try{_previewSource.disconnect();}catch(e){}
-      _previewSource = null;
-    }
-    _previewSource = window._previewCtx.createBufferSource();
-    _previewSource.buffer = _previewBuffer;
-    _previewSource.connect(window._previewCtx.destination);
-    _previewStartTime = window._previewCtx.currentTime - Math.max(0, _previewOffset);
-    _previewSource.start(0, Math.max(0, _previewOffset));
-    _previewPlaying = true;
-    document.getElementById('previewPlayBtn').textContent = '⏸ 일시정지';
 
-    _previewSource.onended = () => {
-      if (_previewPlaying) {
-        _previewPlaying = false; _previewOffset = 0;
-        cancelAnimationFrame(_animFrame);
-        document.getElementById('previewPlayBtn').textContent = '▶ 재생';
-        document.getElementById('previewTime').textContent = '00:00.00';
-        drawWaveform(_previewBuffer, detectedSilences, 0);
-      }
-    };
-    const loop = () => {
-      if (!_previewPlaying) return;
-      const t = window._previewCtx.currentTime - _previewStartTime;
-      _previewOffset = t;
-      drawWaveform(_previewBuffer, detectedSilences, t);
-      updateSubtitleDisplay(t);
-      document.getElementById('previewTime').textContent = formatPreviewTime(t);
-      _animFrame = requestAnimationFrame(loop);
-    };
-    _animFrame = requestAnimationFrame(loop);
-  };
-
-  if (window._previewCtx.state === 'suspended') {
-    window._previewCtx.resume().then(playFn);
-  } else {
-    playFn();
-  }
-}
-
-function stopPreview() {
-  _previewPlaying = false;
-  cancelAnimationFrame(_animFrame);
-  if (_previewSource) {
-    try{_previewSource.stop();}catch(e){}
-    try{_previewSource.disconnect();}catch(e){}
-    _previewSource = null;
-  }
-  document.getElementById('previewPlayBtn').textContent = '▶ 재생';
-}
 
 function updateSubtitleDisplay(t) {
   const el = document.getElementById('currentSubtitleDisplay');
@@ -1397,17 +1343,17 @@ function formatPreviewTime(sec) {
 }
 
 function startPreview() {
-  if (!_previewBuffer || !window._previewCtx) return;
+  if (!_previewBuffer || !_previewCtx) return;
   const playFn = () => {
     if (_previewSource) {
       try{_previewSource.stop();}catch(e){}
       try{_previewSource.disconnect();}catch(e){}
       _previewSource = null;
     }
-    _previewSource = window._previewCtx.createBufferSource();
+    _previewSource = _previewCtx.createBufferSource();
     _previewSource.buffer = _previewBuffer;
-    _previewSource.connect(window._previewCtx.destination);
-    _previewStartTime = window._previewCtx.currentTime - Math.max(0, _previewOffset);
+    _previewSource.connect(_previewCtx.destination);
+    _previewStartTime = _previewCtx.currentTime - Math.max(0, _previewOffset);
     _previewSource.start(0, Math.max(0, _previewOffset));
     _previewPlaying = true;
     document.getElementById('previewPlayBtn').textContent = '⏸ 일시정지';
@@ -1423,7 +1369,7 @@ function startPreview() {
     };
     const loop = () => {
       if (!_previewPlaying) return;
-      const t = window._previewCtx.currentTime - _previewStartTime;
+      const t = _previewCtx.currentTime - _previewStartTime;
       _previewOffset = t;
       drawWaveform(_previewBuffer, detectedSilences, t);
       updateSubtitleDisplay(t);
@@ -1433,8 +1379,8 @@ function startPreview() {
     _animFrame = requestAnimationFrame(loop);
   };
 
-  if (window._previewCtx.state === 'suspended') {
-    window._previewCtx.resume().then(playFn);
+  if (_previewCtx.state === 'suspended') {
+    _previewCtx.resume().then(playFn);
   } else {
     playFn();
   }
@@ -1691,16 +1637,6 @@ async function removeSilenceAndPlay() {
   }
 }
 
-async function exportSilence() {
-  const errEl = document.getElementById('silenceError');
-  const btn   = document.getElementById('silenceExportBtn');
-  errEl.style.display = 'none';
-
-  if (!cleanAudioBuffer && !silenceAudioBuffer) {
-    errEl.textContent = '⚠ 먼저 무음 제거 후 미리보기를 실행해주세요';
-    errEl.style.display = 'block'; return;
-  }
-
 function downloadCleanAudio() {
   if (!cleanAudioBuffer) { alert('무음 제거 결과를 먼저 빌드해주세요.'); return; }
   const numCh = cleanAudioBuffer.numberOfChannels, len = cleanAudioBuffer.length * numCh * 2 + 44;
@@ -1727,9 +1663,19 @@ function downloadCleanAudio() {
   URL.revokeObjectURL(a.href);
 }
 
+async function exportSilence() {
+  const errEl = document.getElementById('silenceError');
+  const btn   = document.getElementById('silenceExportBtn');
+  errEl.style.display = 'none';
+
+  if (!cleanAudioBuffer && !silenceAudioBuffer) {
+    errEl.textContent = '⚠ 먼저 무음 제거 후 미리보기를 실행해주세요';
+    errEl.style.display = 'block'; return;
+  }
+
   btn.disabled = true;
   btn.innerHTML = '⏳ 처리 중...';
-
+  
   try {
     if (!cleanAudioBuffer) {
       const totalDur = silenceAudioBuffer.duration;
