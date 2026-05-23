@@ -787,18 +787,7 @@ function switchTab(name) {
   document.getElementById('panel-'+name).classList.add('active');
 }
 
-function goToTab(name) {
-  switchTab(name);
-  document.getElementById('app').scrollIntoView({ behavior: 'smooth' });
-}
-
-function switchTab(name) {
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.getElementById('tab-'+name).classList.add('active');
-  document.getElementById('panel-'+name).classList.add('active');
-}
-
+// 괄호 꼬임 없이 정상적으로 마감되는 1세트 구조입니다.
 function goToTab(name) {
   switchTab(name);
   document.getElementById('app').scrollIntoView({ behavior: 'smooth' });
