@@ -555,20 +555,14 @@ footer{padding:36px 24px;border-top:1px solid var(--line);display:flex;justify-c
           <div style="font-size:12px;color:var(--gray);line-height:1.7" data-i18n="workflow.v.step2.desc">오리지널 자막을 생성하고 Whisper 자막과 매칭해 싱크를 완성합니다.</div>
           <button onclick="goToTab('retime')" style="margin-top:10px;font-family:'DM Mono',monospace;font-size:10px;color:var(--green);background:none;border:1px solid rgba(71,197,160,.3);border-radius:6px;padding:4px 10px;cursor:pointer" data-i18n="workflow.step2.btn">싱크 합치기 →</button>
         </div>
-        <div style="flex:1;position:relative;z-index:1;padding:0 10px">
-          <div style="width:40px;height:40px;border-radius:50%;background:rgba(200,169,110,.15);border:2px solid var(--gold);color:var(--gold);display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:12px;font-weight:700;margin-bottom:12px">03</div>
+        <div style="flex:1;position:relative;z-index:1;padding-left:16px">
+          <div style="width:40px;height:40px;border-radius:50%;background:var(--gold);color:#0a0a0a;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:12px;font-weight:700;margin-bottom:12px">03</div>
           <span style="display:inline-flex;font-family:'DM Mono',monospace;font-size:9px;padding:2px 8px;border-radius:99px;background:rgba(200,169,110,.15);border:1px solid rgba(200,169,110,.4);color:var(--gold);margin-bottom:8px">💻 LOCAL</span>
-          <div style="font-size:13px;font-weight:600;margin-bottom:6px;line-height:1.3" data-i18n="workflow.v.step3.title">영상 무음 삭제<br><span style="font-size:11px;font-weight:400;color:var(--gray)">(로컬로 복귀)</span></div>
-          <div style="font-size:12px;color:var(--gray);line-height:1.7" data-i18n="workflow.v.step3.desc">영상 파일은 로컬에서 처리합니다. 완성된 싱크 자막을 넣으면 타임스탬프도 자동 조정됩니다.</div>
+          <div style="font-size:13px;font-weight:600;margin-bottom:6px;line-height:1.3" data-i18n="workflow.v.step3.title">영상 무음 삭제<br><span style="font-size:11px;font-weight:400;color:var(--gray)">(완료)</span></div>
+          <div style="font-size:12px;color:var(--gray);line-height:1.7" data-i18n="workflow.v.step3.desc">영상 파일은 로컬에서 처리합니다. 완성된 싱크 자막을 넣으면 타임스탬프도 자동 조정되며 작업이 완료됩니다.</div>
           <a href="http://localhost:5000" target="_blank" style="display:inline-block;margin-top:10px;font-family:'DM Mono',monospace;font-size:10px;color:var(--blue);text-decoration:none;border:1px solid rgba(74,144,217,.3);border-radius:6px;padding:4px 10px" data-i18n="workflow.v.step3.btn">영상 무음 삭제 →</a>
         </div>
-        <div style="flex:1;position:relative;z-index:1;padding-left:10px">
-          <div style="width:40px;height:40px;border-radius:50%;background:rgba(71,197,160,.08);border:2px dashed rgba(71,197,160,.35);color:var(--green);display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:12px;font-weight:700;margin-bottom:12px">04</div>
-          <span style="display:inline-flex;font-family:'DM Mono',monospace;font-size:9px;padding:2px 8px;border-radius:99px;background:rgba(71,197,232,.12);border:1px dashed rgba(71,197,232,.3);color:#47c5e8;margin-bottom:8px">🌐 WEB</span>
-          <div style="font-size:13px;font-weight:600;margin-bottom:6px;line-height:1.3" data-i18n="workflow.v.step4.title">자막 미세 조정<br><span style="font-size:11px;font-weight:400;color:var(--gray)">(선택)</span></div>
-          <div style="font-size:12px;color:var(--gray);line-height:1.7" data-i18n="workflow.v.step4.desc">조정된 자막을 웹에서 추가 편집하거나 형식 변환할 수 있습니다.</div>
-          <button onclick="goToTab('txt2srt')" style="margin-top:10px;font-family:'DM Mono',monospace;font-size:10px;color:var(--gray);background:none;border:1px solid var(--line2);border-radius:6px;padding:4px 10px;cursor:pointer" data-i18n="workflow.v.step4.btn">스크립트 편집 →</button>
-        </div>
+        
       </div>
     </div>
   </div>
