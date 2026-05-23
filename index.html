@@ -1039,36 +1039,7 @@ function downloadResult(key) {
     return;
   }
 
-  const names = { retime:'final', txt2srt:'original', silence:'adjusted' };
   
-  if (key === 'silence' && !state.silence && silenceSrtText) {
-    state.silence = adjustSubtitleLocally(silenceSrtText, detectedSilences);
-  }
-  
-  if (key === 'silence' && !state.silence) {
-    alert('다운로드할 자막이 없어요. 먼저 무음 제거 후 미리보기를 실행해주세요.');
-    return;
-  }
-  
-  if (key === 'retime' && !state.retime) {
-    alert('재배분된 자막 데이터가 없습니다. 타이밍 재배분하기 버튼을 먼저 눌러주세요.');
-    return;
-  }
-  
-  const fmtMap = {
-    retime: document.getElementById('retimeOutFmt')?.value || 'srt',
-    txt2srt: document.getElementById('txt2srtOutFmt')?.value || 'srt',
-    silence: document.getElementById('silenceOutFmt')?.value || 'srt'
-  };
-  
-  const downloadContent = state[key];
-  const blob = new Blob([downloadContent], { type:'text/plain;charset=utf-8' });
-  const a = document.createElement('a');
-  
-  const finalFileName = (originalAudioName !== 'clean_audio' ? originalAudioName : names[key]);
-  a.href = URL.createObjectURL(blob); a.download = finalFileName + '.' + fmtMap[key]; a.click();
-  URL.revokeObjectURL(a.href);
-}
 
   const names = { retime:'final', txt2srt:'original', silence:'adjusted' };
   if (key === 'silence' && !state.silence && silenceSrtText) {
