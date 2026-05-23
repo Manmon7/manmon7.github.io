@@ -318,9 +318,8 @@ footer{padding:36px 24px;border-top:1px solid var(--line);display:flex;justify-c
         <div class="srt-code" id="retimeSrtPreview"></div>
       </div>
       <div class="btn-row">
-  <button class="btn btn-ghost" onclick="downloadResult('silenceAudio')">⬇ 무음 제거 오디오 다운로드</button>
-  <button class="btn btn-accent" id="silenceSrtDlBtn" onclick="downloadResult('silence')" style="display:inline-flex;">⬇ 싱크조정 자막 다운로드</button>
-</div>
+        <button class="btn btn-accent" id="retimeSrtDlBtn" onclick="downloadResult('retime')" style="display:inline-flex;">⬇ 싱크조정 자막 다운로드</button>
+      </div>
     </div>
   </div>
 
@@ -1025,7 +1024,6 @@ async function copyResult(key) {
 function downloadResult(key) {
   triggerAdPopup(); 
 
-  // ── [신설] 웹 무음 제거 오디오 디스크 저장 처리 블록 ──
   if (key === 'silenceAudio') {
     if (!cleanAudioBuffer) { alert('무음 제거 결과를 먼저 빌드해주세요.'); return; }
     const numCh = cleanAudioBuffer.numberOfChannels, len = cleanAudioBuffer.length * numCh * 2 + 44;
@@ -1048,9 +1046,43 @@ function downloadResult(key) {
       offset++;
     }
     const blob = new Blob([buf], { type: 'audio/wav' });
-    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'clean_audio.wav'; a.click();
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = originalAudioName + '.' + originalAudioExt; a.click();
     return;
   }
+
+  const names = { retime:'final', txt2srt:'original', silence:'adjusted' };
+  if (key === 'silence' && !state.silence && silenceSrtText) {
+    state.silence = adjustSubtitleLocally(silenceSrtText, detectedSilences);
+  }
+  
+  // [수정] key가 'silence'일 때만 무음 제거 검증을 하도록 조건식 정정
+  if (key === 'silence' && !state.silence) {
+    alert('다운로드할 자막이 없어요. 먼저 무음 제거 후 미리보기를 실행해주세요.');
+    return;
+  }
+  
+  // [추가 예외 필터] 싱크 합치기 자체 결과물 검증
+  if (key === 'retime' && !state.retime) {
+    alert('재배분된 자막 데이터가 없습니다. 타이밍 재배분하기 버튼을 먼저 눌러주세요.');
+    return;
+  }
+  
+  const fmtMap = {
+    retime: document.getElementById('retimeOutFmt')?.value || 'srt',
+    txt2srt: document.getElementById('txt2srtOutFmt')?.value || 'srt',
+    silence: document.getElementById('silenceOutFmt')?.value || 'srt'
+  };
+  
+  // 데이터 바인딩 대상을 동적으로 처리
+  const downloadContent = state[key];
+  const blob = new Blob([downloadContent], { type:'text/plain;charset=utf-8' });
+  const a = document.createElement('a');
+  
+  // 파일명을 오디오 원본 이름 베이스로 매핑
+  const finalFileName = (originalAudioName !== 'clean_audio' ? originalAudioName : names[key]);
+  a.href = URL.createObjectURL(blob); a.download = finalFileName + '.' + fmtMap[key]; a.click();
+  URL.revokeObjectURL(a.href);
+}
 
   const names = { retime:'final', txt2srt:'original', silence:'adjusted' };
   if (key === 'silence' && !state.silence && silenceSrtText) {
