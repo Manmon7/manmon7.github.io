@@ -395,7 +395,7 @@ footer{padding:36px 24px;border-top:1px solid var(--line);display:flex;justify-c
     <div class="card">
       <div class="card-title" data-i18n="silence.upload.title">오디오 + 자막 동시 첨부 (드래그 가능)</div>
       <div class="dropzone" id="dz-silence" style="min-height:120px">
-        <input type="file" id="silenceMultiFile" accept="audio/*,video/*,.srt" multiple onchange="handleSilenceFiles(this.files)">
+        <input type="file" id="silenceMultiFile" accept="audio/*,.mp3,.wav,.m4a,.aac,.ogg,.flac,.srt,.vtt,.ass,.ssa,.sbv" multiple onchange="handleSilenceFiles(this.files)">
         <div class="dz-icon">✂️</div>
         <div class="dz-title" data-i18n="silence.upload.dztitle">오디오 파일 + 자막 파일을 함께 드래그하거나 클릭해서 선택</div>
         <div class="dz-sub" data-i18n="silence.upload.sub">오디오: MP3, WAV, M4A 등 · 자막: .srt .vtt .ass .sbv (선택사항)</div>
@@ -884,9 +884,19 @@ dzSilence.addEventListener('dragleave', () => dzSilence.classList.remove('over')
 dzSilence.addEventListener('drop', e => { e.preventDefault(); dzSilence.classList.remove('over'); handleSilenceFiles(e.dataTransfer.files); });
 
 async function handleSilenceFiles(files) {
-  // 기존 파일과 새로 드래그/선택한 파일을 합침
   const newFiles = Array.from(files);
-  
+
+  // 영상 파일 차단
+  const videoExts = ['mp4', 'mov', 'avi', 'mkv', 'webm', 'wmv', 'flv', 'mpeg', 'mpg', 'm4v'];
+  const videoFile = newFiles.find(f => {
+    const ext = f.name.split('.').pop().toLowerCase();
+    return videoExts.includes(ext) || f.type.startsWith('video/');
+  });
+  if (videoFile) {
+    alert("⚠ 영상 파일은 웹에서 처리할 수 없어요.\n영상 무음 삭제는 로컬 앱(localhost:5000)에서 진행해 주세요.");
+    return;
+  }
+
   if (uploadedSilenceFiles.length + newFiles.length > 2) {
     alert("⚠ 파일은 오디오 파일 1개와 자막 파일 1개, 총 2개까지만 업로드할 수 있습니다.");
     return;
