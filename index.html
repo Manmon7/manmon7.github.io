@@ -49,7 +49,7 @@ textarea{resize:vertical;min-height:120px;line-height:1.6}
 .dz-sub{font-size:12px;color:var(--gray)}
 .file-chip{display:inline-flex;align-items:center;gap:8px;background:rgba(71,197,160,.1);border:1px solid rgba(71,197,160,.25);border-radius:8px;padding:8px 14px;font-size:13px;margin-top:10px;color:var(--green)}
 
-/* SRT 드롭존 */
+/* 자막 드롭존 */
 .srt-dropzone{border:1px solid var(--line);border-radius:10px;overflow:hidden;transition:border-color .2s}
 .srt-dropzone.over{border-color:var(--gold)}
 .srt-dz-header{background:var(--bg3);padding:10px 14px;font-family:'DM Mono',monospace;font-size:11px;color:var(--gray);display:flex;align-items:center;justify-content:space-between}
@@ -254,7 +254,7 @@ footer{padding:36px 24px;border-top:1px solid var(--line);display:flex;justify-c
   <!-- 패널 1: 싱크 합치기 -->
   <div class="panel" id="panel-retime">
     <div class="card">
-      <div class="card-title" data-i18n="retime.whisper.title">Whisper SRT (타이밍 O, 오타 X)</div>
+      <div class="card-title" data-i18n="retime.whisper.title">Whisper 자막 (타이밍 O, 오타 X)</div>
       <div style="text-align: center; margin: 15px 0; width: 100%; display: flex; justify-content: center;">
   
 
@@ -277,7 +277,7 @@ footer{padding:36px 24px;border-top:1px solid var(--line);display:flex;justify-c
       </div>
     </div>
     <div class="card">
-      <div class="card-title" data-i18n="retime.original.title">원문 SRT (텍스트 O, 타이밍 X)</div>
+      <div class="card-title" data-i18n="retime.original.title">원문 자막 (텍스트 O, 타이밍 X)</div>
       <div class="srt-dropzone" id="dz-original">
         <div class="srt-dz-header">
           <span data-i18n="retime.original.label">원문 자막</span>
@@ -324,7 +324,7 @@ footer{padding:36px 24px;border-top:1px solid var(--line);display:flex;justify-c
     </div>
   </div>
 
-  <!-- 패널 2: 텍스트 → SRT -->
+  <!-- 패널 2: 텍스트 → 자막 -->
   <div class="panel active" id="panel-txt2srt">
     <div class="card">
       <div class="card-title" data-i18n="txt2srt.card1">원문 텍스트 입력</div>
@@ -363,7 +363,7 @@ footer{padding:36px 24px;border-top:1px solid var(--line);display:flex;justify-c
       </div>
       <div class="btn-row">
         <button class="btn btn-ghost" onclick="resetSegEditor()">↩ 다시 입력</button>
-        <button class="btn btn-primary" onclick="buildSrtFromSegs()" style="flex:2">📝 SRT 생성</button>
+        <button class="btn btn-primary" onclick="buildSrtFromSegs()" style="flex:2">📝 자막 생성</button>
       </div>
     </div>
     <button class="btn btn-primary" id="txt2srtBtn" onclick="convertTxt()"><span data-i18n="txt2srt.btn">📝 자동 분절 후 편집</span></button>
@@ -379,7 +379,7 @@ footer{padding:36px 24px;border-top:1px solid var(--line);display:flex;justify-c
       </div>
       <div class="btn-row">
         <button class="btn btn-ghost" onclick="copyResult('txt2srt')">📋 복사</button>
-        <button class="btn btn-accent" onclick="downloadResult('txt2srt')">⬇ SRT 다운로드</button>
+        <button class="btn btn-accent" onclick="downloadResult('txt2srt')">⬇ 자막 다운로드</button>
       </div>
     </div>
   </div>
@@ -394,7 +394,7 @@ footer{padding:36px 24px;border-top:1px solid var(--line);display:flex;justify-c
   
 </div>
     <div class="card">
-      <div class="card-title" data-i18n="silence.upload.title">오디오 + SRT 동시 첨부 (드래그 가능)</div>
+      <div class="card-title" data-i18n="silence.upload.title">오디오 + 자막 동시 첨부 (드래그 가능)</div>
       <div class="dropzone" id="dz-silence" style="min-height:120px">
         <input type="file" id="silenceMultiFile" accept="audio/*,video/*,.srt" multiple onchange="handleSilenceFiles(this.files)">
         <div class="dz-icon">✂️</div>
@@ -477,7 +477,7 @@ footer{padding:36px 24px;border-top:1px solid var(--line);display:flex;justify-c
       </div>
       <div class="btn-row">
         <button class="btn btn-ghost" onclick="downloadCleanAudio()">⬇ 오디오 다운로드</button>
-        <button class="btn btn-accent" id="silenceSrtDlBtn" onclick="downloadResult('silence')" style="display:inline-flex;">⬇ SRT 다운로드</button>
+        <button class="btn btn-accent" id="silenceSrtDlBtn" onclick="downloadResult('silence')" style="display:inline-flex;">⬇ 자막 다운로드</button>
       </div>
     </div>
   </div>
@@ -763,6 +763,9 @@ function parseSrtForPreview(srt) {
 
 const RENDER_URL = 'https://9mcwy3i0wx.onrender.com';
 const state = { retime:'', txt2srt:'', silence:'' };
+
+// ── 무음 삭제 탭 파일 누적 업로드 및 관리 시스템 ──
+let uploadedSilenceFiles = []; // 업로드된 파일들을 누적 보관할 전역 배열
 let silenceAudioBuffer = null, detectedSilences = [], cleanAudioBuffer = null;
 let _cleanBuffer = null, _cleanSubtitles = [];
 let _cleanCtx = null, _cleanSource = null;
@@ -847,27 +850,55 @@ dzSilence.addEventListener('dragleave', () => dzSilence.classList.remove('over')
 dzSilence.addEventListener('drop', e => { e.preventDefault(); dzSilence.classList.remove('over'); handleSilenceFiles(e.dataTransfer.files); });
 
 async function handleSilenceFiles(files) {
+  // 기존 파일과 새로 드래그/선택한 파일을 합침
+  const newFiles = Array.from(files);
+  
+  if (uploadedSilenceFiles.length + newFiles.length > 2) {
+    alert("⚠ 파일은 오디오 파일 1개와 자막 파일 1개, 총 2개까지만 업로드할 수 있습니다.");
+    return;
+  }
+
+  if (!_previewCtx || _previewCtx.state === 'closed') {
+    _previewCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+
+  for (const file of newFiles) {
+    uploadedSilenceFiles.push(file);
+  }
+
+  await processAndRenderSilenceFiles();
+}
+
+// 파일 배열을 기반으로 데이터 파싱 및 UI 칩셋 재생성
+async function processAndRenderSilenceFiles() {
   const chips = document.getElementById('silenceFileChips');
   chips.innerHTML = '';
+  
+  // 상태 초기화
   silenceSrtText = '';
   silenceAudioBuffer = null;
   cleanAudioBuffer = null;
   detectedSilences = [];
 
-  const cleanCard = document.getElementById('cleanPreviewCard');
-  if (cleanCard) cleanCard.style.display = 'none';
-  const previewCard = document.getElementById('silencePreviewCard');
-  if (previewCard) previewCard.style.display = 'none';
+  document.getElementById('cleanPreviewCard').style.display = 'none';
+  document.getElementById('silencePreviewCard').style.display = 'none';
   document.getElementById('silenceExportBtn').style.display = 'none';
   document.getElementById('silenceRemoveBtn').style.display = 'none';
+  document.getElementById('silenceSettings').style.display = 'none';
 
-if (!_previewCtx || _previewCtx.state === 'closed') {
-    _previewCtx = new (window.AudioContext || window.webkitAudioContext)();
-}
-  for (const file of files) {
+  const subExts = ['.srt', '.vtt', '.ass', '.ssa', '.sbv'];
+
+  // 보관된 파일들을 순회하며 오디오 디코딩 및 자막 텍스트 추출
+  for (let i = 0; i < uploadedSilenceFiles.length; i++) {
+    const file = uploadedSilenceFiles[i];
     const chip = document.createElement('div');
     chip.className = 'file-chip';
-    const subExts = ['.srt','.vtt','.ass','.ssa','.sbv'];
+    chip.style.display = 'inline-flex';
+    chip.style.alignItems = 'center';
+    chip.style.gap = '8px';
+
+    const textSpan = document.createElement('span');
+    
     if (subExts.some(e => file.name.toLowerCase().endsWith(e))) {
       const ext = file.name.split('.').pop().toLowerCase();
       const reader = new FileReader();
@@ -877,19 +908,43 @@ if (!_previewCtx || _previewCtx.state === 'closed') {
         if (fmtEl) fmtEl.value = ext === 'ssa' ? 'ass' : ext;
       };
       reader.readAsText(file, 'utf-8');
-      chip.textContent = '📄 ' + file.name;
+      textSpan.textContent = '📄 ' + file.name;
     } else {
-      silenceAudioBuffer = await _previewCtx.decodeAudioData(await file.arrayBuffer());
-      chip.textContent = '🎧 ' + file.name;
+      try {
+        silenceAudioBuffer = await _previewCtx.decodeAudioData(await file.arrayBuffer());
+        textSpan.textContent = '🎧 ' + file.name;
+      } catch (err) {
+        console.error("오디오 디코딩 실패:", err);
+        textSpan.textContent = '❌ ' + file.name + ' (인식 실패)';
+      }
     }
+
+    // X 버튼 생성 및 삭제 이벤트 바인딩
+    const delBtn = document.createElement('span');
+    delBtn.innerHTML = '&times;';
+    delBtn.style.cursor = 'pointer';
+    delBtn.style.fontWeight = 'bold';
+    delBtn.style.color = 'var(--red)';
+    delBtn.style.marginLeft = '4px';
+    delBtn.onclick = (e) => {
+      e.stopPropagation(); // 드롭존 클릭 이벤트 전파 방지
+      removeSilenceFile(i);
+    };
+
+    chip.appendChild(textSpan);
+    chip.appendChild(delBtn);
     chips.appendChild(chip);
   }
 
   if (silenceAudioBuffer) {
     document.getElementById('silenceSettings').style.display = 'block';
-    document.getElementById('silenceExportBtn').style.display = 'none';
-    document.getElementById('silenceRemoveBtn').style.display = 'none';
   }
+}
+
+// 특정 인덱스의 파일을 제외하고 다시 UI 갱신
+function removeSilenceFile(index) {
+  uploadedSilenceFiles.splice(index, 1);
+  processAndRenderSilenceFiles();
 }
 
 function renderSRT(srt, targetId) {
@@ -1663,6 +1718,7 @@ function downloadCleanAudio() {
   URL.revokeObjectURL(a.href);
 }
 
+// 오디오 파일 변환과 가공된 자막 파일을 비동기 락 없이 일괄 프로세스로 동시 다운로드
 async function exportSilence() {
   const errEl = document.getElementById('silenceError');
   const btn   = document.getElementById('silenceExportBtn');
@@ -1674,9 +1730,10 @@ async function exportSilence() {
   }
 
   btn.disabled = true;
-  btn.innerHTML = '⏳ 처리 중...';
+  btn.innerHTML = '⏳ 파일 빌드 및 다운로드 중...';
   
   try {
+    // 1) 무음 제거 오디오 버퍼가 없는 경우 빌드 진행
     if (!cleanAudioBuffer) {
       const totalDur = silenceAudioBuffer.duration;
       const keepSegs = [];
@@ -1702,21 +1759,58 @@ async function exportSilence() {
       cleanAudioBuffer = await offCtx.startRendering();
     }
 
+    // 2) 자막 파일 타임라인 조정 데이터 확보
     if (!state.silence && silenceSrtText) {
       state.silence = adjustSubtitleLocally(silenceSrtText, detectedSilences);
     }
 
-    downloadCleanAudio();
+    // 3) [핵심 개선] 오디오 바이너리 인코딩 수행
+    const numCh = cleanAudioBuffer.numberOfChannels;
+    const len = cleanAudioBuffer.length * numCh * 2 + 44;
+    const audioBuf = new ArrayBuffer(len);
+    const view = new DataView(audioBuf);
+    let pos = 0;
+    
+    const su32 = v => { view.setUint32(pos, v, true); pos += 4; };
+    const su16 = v => { view.setUint16(pos, v, true); pos += 2; };
+    
+    su32(0x46464952); su32(len - 8); su32(0x45564157); su32(0x20746d66); su32(16); su16(1); su16(numCh);
+    su32(cleanAudioBuffer.sampleRate); su32(cleanAudioBuffer.sampleRate * 2 * numCh);
+    su16(numCh * 2); su16(16); su32(0x61746164); su32(len - pos - 4);
+    
+    const channels = [];
+    for (let i = 0; i < numCh; i++) channels.push(cleanAudioBuffer.getChannelData(i));
+    let offset = 0;
+    while (pos < len) {
+      for (let i = 0; i < numCh; i++) {
+        let s = Math.max(-1, Math.min(1, channels[i][offset]));
+        s = (0.5 + s < 0 ? s * 32768 : s * 32767) | 0;
+        view.setInt16(pos, s, true); pos += 2;
+      }
+      offset++;
+    }
+    const audioBlob = new Blob([audioBuf], { type: 'audio/wav' });
+
+    // 4) 파일 다운로드 실행 트리거 (두 개 채널 순시 개방)
+    const audioLink = document.createElement('a');
+    audioLink.href = URL.createObjectURL(audioBlob);
+    audioLink.download = 'clean_audio.wav';
+    document.body.appendChild(audioLink);
+    audioLink.click();
+    document.body.removeChild(audioLink);
 
     if (state.silence) {
       const fmt = document.getElementById('silenceOutFmt')?.value || 'srt';
-      const blob = new Blob([state.silence], {type: 'text/plain;charset=utf-8'});
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'adjusted.' + fmt;
-      a.click();
-      URL.revokeObjectURL(a.href);
+      const subBlob = new Blob([state.silence], {type: 'text/plain;charset=utf-8'});
+      const subLink = document.createElement('a');
+      subLink.href = URL.createObjectURL(subBlob);
+      subLink.download = 'adjusted.' + fmt;
+      document.body.appendChild(subLink);
+      subLink.click();
+      document.body.removeChild(subLink);
     }
+
+    triggerAdPopup(); // 기존 광고 레이어 함수 유지
 
   } catch(e) {
     errEl.textContent = '⚠ ' + e.message;
@@ -1745,7 +1839,7 @@ const I18N = {
     'txt2srt.editcard': '자막 줄 편집 — 엔터로 분할 · + 추가 · × 삭제',
     'txt2srt.addtop': '+ 맨 위',
     'txt2srt.reset': '↩ 다시 입력',
-    'txt2srt.build': '📝 SRT 생성',
+    'txt2srt.build': '📝 자막 생성',
     'txt2srt.btn': '📝 자동 분절 후 편집',
     'txt2srt.count': '자막 수',
     'txt2srt.dur': '총 길이',
@@ -1763,7 +1857,7 @@ const I18N = {
     'retime.o': '원문',
     'retime.c': '결과',
     'retime.copy': '📋 복사',
-    'retime.dl': '⬇ SRT 다운로드',
+    'retime.dl': '⬇ 자막 다운로드',
     'silence.upload.title': '오디오 파일 + 자막 파일을 함께 드래그하거나 클릭해서 선택',
     'silence.upload.sub': '오디오: MP3, WAV, M4A 등 · 자막: .srt .vtt .ass .sbv (선택사항)',
     'silence.settings.title': '무음 감지 설정',
@@ -1829,14 +1923,14 @@ const I18N = {
     'txt2srt.maxchars': '최대 글자 수 (한글 기준)',
     'txt2srt.duration': '영상 총 길이 (초, 타임스탬프 계산용)',
     'txt2srt.duration.ph': '예: 63',
-    'retime.whisper.title': 'Whisper SRT (타이밍 O, 오타 X)',
+    'retime.whisper.title': 'Whisper 자막 (타이밍 O, 오타 X)',
     'retime.whisper.label': 'WHISPER 자막',
-    'retime.whisper.ph': 'Whisper SRT를 붙여넣거나 파일을 드래그 / 클릭해서 열어주세요',
-    'retime.original.title': '원문 SRT (텍스트 O, 타이밍 X)',
+    'retime.whisper.ph': 'Whisper 자막을 붙여넣거나 파일을 드래그 / 클릭해서 열어주세요',
+    'retime.original.title': '원문 자막 (텍스트 O, 타이밍 X)',
     'retime.original.label': '원문 자막',
     'retime.original.ph': '원문 SRT를 붙여넣거나 파일을 드래그 / 클릭해서 열어주세요',
     'retime.outfmt': '출력 형식:',
-    'silence.upload.title': '오디오 + SRT 동시 첨부 (드래그 가능)',
+    'silence.upload.title': '오디오 + 자막 동시 첨부 (드래그 가능)',
     'silence.upload.dztitle': '오디오 파일 + 자막 파일을 함께 드래그하거나 클릭해서 선택',
     'silence.upload.sub': '오디오: MP3, WAV, M4A 등 · 자막: .srt .vtt .ass .sbv (선택사항)',
     'silence.settings.title': '무음 감지 설정',
@@ -1902,10 +1996,10 @@ const I18N = {
     'txt2srt.dl': '⬇ Download Subtitle',
     'retime.whisper.title': 'WHISPER SUBTITLE (Timing ✓, Typos ✗)',
     'retime.whisper.label': 'WHISPER.SRT',
-    'retime.whisper.ph': 'Paste Whisper SRT or drag/click to open',
+    'retime.whisper.ph': 'Paste Whisper subtitle or drag/click to open',
     'retime.original.title': 'ORIGINAL SUBTITLE (Text ✓, Timing ✗)',
     'retime.original.label': 'ORIGINAL.SRT',
-    'retime.original.ph': 'Paste original SRT or drag/click to open',
+    'retime.original.ph': 'Paste original subtitle or drag/click to open',
     'retime.outfmt': 'Output format',
     'retime.btn': '🔧 Redistribute Timing',
     'retime.w': 'Whisper',
@@ -1978,14 +2072,14 @@ const I18N = {
     'txt2srt.maxchars': 'Max characters per line (for auto-split)',
     'txt2srt.duration': 'Total video length (sec, for timestamps)',
     'txt2srt.duration.ph': 'e.g. 63',
-    'retime.whisper.title': 'Whisper SRT (Timing ✓, Typos ✗)',
-    'retime.whisper.label': 'WHISPER SRT',
-    'retime.whisper.ph': 'Paste Whisper SRT or drag / click to open',
-    'retime.original.title': 'Original SRT (Text ✓, Timing ✗)',
-    'retime.original.label': 'ORIGINAL SRT',
-    'retime.original.ph': 'Paste Original SRT or drag / click to open',
+    'retime.whisper.title': 'Whisper subtitle (Timing ✓, Typos ✗)',
+    'retime.whisper.label': 'WHISPER subtitle',
+    'retime.whisper.ph': 'Paste Whisper subtitle or drag / click to open',
+    'retime.original.title': 'Original subtitle (Text ✓, Timing ✗)',
+    'retime.original.label': 'ORIGINAL subtitle',
+    'retime.original.ph': 'Paste Original subtitle or drag / click to open',
     'retime.outfmt': 'Output format:',
-    'silence.upload.title': 'Upload Audio + SRT together (drag supported)',
+    'silence.upload.title': 'Upload Audio + subtitle together (drag supported)',
     'silence.upload.dztitle': 'Drag audio + subtitle files here or click to select',
     'silence.upload.sub': 'Audio: MP3, WAV, M4A etc · Subtitle: .srt .vtt .ass .sbv (optional)',
     'silence.settings.title': 'Silence Detection Settings',
