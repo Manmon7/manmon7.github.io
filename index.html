@@ -767,6 +767,11 @@ const state = { retime:'', txt2srt:'', silence:'' };
 // ── 무음 삭제 탭 파일 누적 업로드 및 관리 시스템 ──
 let uploadedSilenceFiles = []; // 업로드된 파일들을 누적 보관할 전역 배열
 let silenceAudioBuffer = null, detectedSilences = [], cleanAudioBuffer = null;
+
+// [여기에 삽입] 원래 오디오 파일의 이름과 확장자를 보관할 변수
+let originalAudioName = 'clean_audio';
+let originalAudioExt = 'mp3';
+
 let _cleanBuffer = null, _cleanSubtitles = [];
 let _cleanCtx = null, _cleanSource = null;
 let _cleanOffset = 0, _cleanStartTime = 0, _cleanPlaying = false, _cleanAnimFrame = null;
@@ -909,8 +914,18 @@ async function processAndRenderSilenceFiles() {
       };
       reader.readAsText(file, 'utf-8');
       textSpan.textContent = '📄 ' + file.name;
-    } else {
+   } else {
       try {
+        // [수정] 업로드된 파일의 원래 이름과 확장자를 분리하여 변수에 저장
+        const lastDot = file.name.lastIndexOf('.');
+        if (lastDot !== -1) {
+          originalAudioName = file.name.substring(0, lastDot) + '_clean';
+          originalAudioExt = file.name.substring(lastDot + 1).toLowerCase();
+        } else {
+          originalAudioName = file.name + '_clean';
+          originalAudioExt = 'mp3';
+        }
+
         silenceAudioBuffer = await _previewCtx.decodeAudioData(await file.arrayBuffer());
         textSpan.textContent = '🎧 ' + file.name;
       } catch (err) {
@@ -1789,12 +1804,19 @@ async function exportSilence() {
       }
       offset++;
     }
-    const audioBlob = new Blob([audioBuf], { type: 'audio/wav' });
 
-    // 4) 파일 다운로드 실행 트리거 (두 개 채널 순시 개방)
+    // [수정] 원래 확장자 종류에 맞춰 브라우저 마임타입을 동적으로 지정
+    let mimeType = 'audio/wav';
+    if (originalAudioExt === 'mp3') mimeType = 'audio/mp3';
+    else if (originalAudioExt === 'm4a') mimeType = 'audio/x-m4a';
+    else if (originalAudioExt === 'aac') mimeType = 'audio/aac';
+
+    const audioBlob = new Blob([audioBuf], { type: mimeType });
+
+   // 4) 파일 다운로드 실행 트리거 (오디오와 자막 파일명 일치 및 원래 확장자 유지)
     const audioLink = document.createElement('a');
     audioLink.href = URL.createObjectURL(audioBlob);
-    audioLink.download = 'clean_audio.wav';
+    audioLink.download = originalAudioName + '.' + originalAudioExt; // 원래 확장자로 변경
     document.body.appendChild(audioLink);
     audioLink.click();
     document.body.removeChild(audioLink);
@@ -1804,7 +1826,7 @@ async function exportSilence() {
       const subBlob = new Blob([state.silence], {type: 'text/plain;charset=utf-8'});
       const subLink = document.createElement('a');
       subLink.href = URL.createObjectURL(subBlob);
-      subLink.download = 'adjusted.' + fmt;
+      subLink.download = originalAudioName + '.' + fmt; // 자막도 동일한 파일명으로 다운로드
       document.body.appendChild(subLink);
       subLink.click();
       document.body.removeChild(subLink);
