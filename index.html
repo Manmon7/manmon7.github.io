@@ -799,6 +799,53 @@ function goToTab(name) {
   document.getElementById('app').scrollIntoView({ behavior: 'smooth' });
 }
 
+function switchTab(name) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  document.getElementById('panel-'+name).classList.add('active');
+}
+
+function goToTab(name) {
+  switchTab(name);
+  document.getElementById('app').scrollIntoView({ behavior: 'smooth' });
+}
+
+// [여기에 삽입] 워크플로우 하단 '오디오+자막' / '영상+자막' 탭 전환용 함수
+function switchWfTab(type) {
+  // 1. 오디오/영상 버튼 스타일(활성화/비활성화) 전환
+  const btnAudio = document.getElementById('wf-tab-audio');
+  const btnVideo = document.getElementById('wf-tab-video');
+  
+  if (type === 'audio') {
+    btnAudio.style.border = '1px solid var(--gold)';
+    btnAudio.style.background = 'rgba(200,169,110,.15)';
+    btnAudio.style.color = 'var(--gold)';
+    btnAudio.style.fontWeight = '700';
+    
+    btnVideo.style.border = '1px solid var(--line2)';
+    btnVideo.style.background = 'transparent';
+    btnVideo.style.color = 'var(--gray)';
+    btnVideo.style.fontWeight = '400';
+    
+    document.getElementById('wf-audio').style.display = 'block';
+    document.getElementById('wf-video').style.display = 'none';
+  } else {
+    btnVideo.style.border = '1px solid var(--gold)';
+    btnVideo.style.background = 'rgba(200,169,110,.15)';
+    btnVideo.style.color = 'var(--gold)';
+    btnVideo.style.fontWeight = '700';
+    
+    btnAudio.style.border = '1px solid var(--line2)';
+    btnAudio.style.background = 'transparent';
+    btnAudio.style.color = 'var(--gray)';
+    btnAudio.style.fontWeight = '400';
+    
+    document.getElementById('wf-audio').style.display = 'none';
+    document.getElementById('wf-video').style.display = 'block';
+  }
+}
+
 function loadSrtFile(input, targetId) {
   const file = input.files[0]; if (!file) return;
   const reader = new FileReader();
