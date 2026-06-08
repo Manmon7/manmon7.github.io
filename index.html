@@ -1059,14 +1059,25 @@ function downloadResult(key) {
     alert('다운로드할 자막이 없어요. 먼저 무음 제거 후 미리보기를 실행해주세요.');
     return;
   }
+
+  // 각 패널에 깔린 선택 상자 객체를 안전하게 직접 낚아챕니다.
+  const retimeSelect = document.getElementById('retimeOutFmt');
+  const txt2srtSelect = document.getElementById('txt2srtOutFmt');
+  const silenceSelect = document.getElementById('silenceOutFmt');
+
   const fmtMap = {
-    retime: document.getElementById('retimeOutFmt')?.value || 'srt',
-    txt2srt: document.getElementById('txt2srtOutFmt')?.value || 'srt',
-    silence: document.getElementById('silenceOutFmt')?.value || 'srt'
+    retime: retimeSelect ? retimeSelect.value : 'srt',
+    txt2srt: txt2srtSelect ? txt2srtSelect.value : 'srt',
+    silence: silenceSelect ? silenceSelect.value : 'srt'
   };
+
   const blob = new Blob([state[key]], { type:'text/plain;charset=utf-8' });
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob); a.download = names[key]+'.'+fmtMap[key]; a.click();
+  a.href = URL.createObjectURL(blob); 
+  
+  // 선택한 확장자 정보(txt 등)에 맞춰 무결점 파일명 완성
+  a.download = names[key] + '.' + fmtMap[key]; 
+  a.click();
   URL.revokeObjectURL(a.href);
 }
 
